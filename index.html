@@ -1,0 +1,562 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>html{color-scheme:light}body{margin:0;font:14px system-ui}img{max-width:100%}[hidden]{display:none!important}</style></head><body><title>Quiz Infra, Redes e Segurança</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: coluna única (max 780px) sobre fundo em camadas (malha de gradientes + ondas + grade fina = sinal/rede);
+   cabeçalho fixo com progresso e alternador de tema; metadados da questão em mono, como etiquetas de rack. */
+:root{
+  --bg:#eff1f4; --bg-2:#e4e8f2; --bg-3:#f1e8e0; --surface:#ffffff; --surface-2:#f5f8fc; --fg:#15202b; --muted:#5a6b7c; --line:#d6dfe9;
+  --accent:#233876; --accent-2:#b8622d; --accent-ink:#ffffff; --accent-soft:#e6eaf5;
+  --ok:#157347; --ok-soft:#dff3e8; --bad:#b42318; --bad-soft:#fde6e3; --warn:#9a6700; --warn-soft:#fff1cf;
+  --wave1:rgba(35,56,118,.09); --wave2:rgba(184,98,45,.08); --wave3:rgba(35,56,118,.06);
+  --grid:rgba(21,32,43,.045); --glow:rgba(21,32,43,.10);
+  --shadow:0 1px 0 rgba(21,32,43,.04), 0 6px 18px rgba(21,32,43,.06);
+  --display:"Bricolage Grotesque","IBM Plex Sans",system-ui,sans-serif; --body:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace; --r:6px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0e1116; --bg-2:#131a2a; --bg-3:#1b1512; --surface:#141c26; --surface-2:#1a2431; --fg:#e8edf3; --muted:#9aa9b8; --line:#283442;
+  --accent:#8fa6ea; --accent-2:#e39a6a; --accent-ink:#0b1320; --accent-soft:#1d2744;
+  --ok:#5fd38d; --ok-soft:#12301f; --bad:#ff8a7a; --bad-soft:#3a1915; --warn:#f0c15a; --warn-soft:#33280f;
+  --wave1:rgba(143,166,234,.08); --wave2:rgba(227,154,106,.07); --wave3:rgba(143,166,234,.05);
+  --grid:rgba(232,237,243,.04); --glow:rgba(150,200,255,.16);
+  --shadow:0 12px 34px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.4); color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0e1116; --bg-2:#131a2a; --bg-3:#1b1512; --surface:#141c26; --surface-2:#1a2431; --fg:#e8edf3; --muted:#9aa9b8; --line:#283442;
+  --accent:#8fa6ea; --accent-2:#e39a6a; --accent-ink:#0b1320; --accent-soft:#1d2744;
+  --ok:#5fd38d; --ok-soft:#12301f; --bad:#ff8a7a; --bad-soft:#3a1915; --warn:#f0c15a; --warn-soft:#33280f;
+  --wave1:rgba(143,166,234,.08); --wave2:rgba(227,154,106,.07); --wave3:rgba(143,166,234,.05);
+  --grid:rgba(232,237,243,.04); --glow:rgba(150,200,255,.16);
+  --shadow:0 12px 34px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.4); color-scheme:dark }
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+body{color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.55;
+  background:
+    radial-gradient(1100px 600px at 8% -10%, var(--bg-2) 0%, transparent 60%),
+    radial-gradient(900px 500px at 100% 10%, var(--bg-3) 0%, transparent 55%),
+    radial-gradient(800px 600px at 50% 110%, var(--bg-2) 0%, transparent 60%),
+    var(--bg);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 56px;position:relative;min-height:100%;
+  transition:background-color .35s ease,color .35s ease}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+/* camadas de fundo */
+.bgfx{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.bgfx .grid{position:absolute;inset:0;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:44px 44px;mask-image:radial-gradient(ellipse at 50% 30%,#000 30%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at 50% 30%,#000 30%,transparent 75%)}
+.bgfx svg{position:absolute;left:0;width:200%;height:auto;min-width:1600px}
+.bgfx .w1{top:6%;animation:drift 42s linear infinite}
+.bgfx .w2{top:40%;animation:drift 58s linear infinite reverse}
+.bgfx .w3{bottom:-2%;animation:drift 70s linear infinite}
+@keyframes drift{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.glow{position:fixed;left:0;top:0;width:360px;height:360px;border-radius:50%;pointer-events:none;z-index:0;transform:translate(-50%,-50%);background:radial-gradient(circle,var(--glow) 0%,transparent 65%);opacity:0;transition:opacity .4s ease}
+@media (hover:none){.glow{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.glow{display:none}}
+.wrap{max-width:780px;margin:0 auto;position:relative;z-index:1}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;line-height:1.12;margin:0}
+h1{font-size:clamp(30px,5.6vw,44px);font-weight:700;letter-spacing:-.02em;font-variation-settings:"opsz" 96}
+h2{font-size:24px;font-weight:700}
+h3{font-size:18px;font-weight:600}
+p{margin:0}
+.eyebrow{font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+.mono{font-family:var(--mono);font-size:13px}
+.muted{color:var(--muted)}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:color-mix(in srgb,var(--bg) 78%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding-block:10px;margin-left:calc(-1*max(16px,env(safe-area-inset-left,0px)));margin-right:calc(-1*max(16px,env(safe-area-inset-right,0px)));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top .in{max-width:780px;margin:0 auto;width:100%;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header.top .brand{font-family:var(--display);font-weight:700;font-size:15px;line-height:1.2}
+header.top .brand small{display:block;font-family:var(--mono);font-weight:400;font-size:10.5px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
+.leds{flex:1 1 120px;min-width:0;display:flex;gap:3px;height:10px;align-items:stretch}
+.leds i{flex:1;background:var(--line);border-radius:2px;transition:background .3s,transform .3s;min-width:3px}
+.leds i.cur{background:var(--accent);animation:blink 1.1s ease-in-out infinite}
+.leds i.ok{background:var(--ok)} .leds i.bad{background:var(--accent-2)} .leds i.skip{background:var(--muted)} .leds i.ans{background:var(--accent)}
+@keyframes blink{50%{opacity:.35}}
+.score{font-family:var(--mono);font-size:12.5px;font-variant-numeric:tabular-nums;color:var(--muted);white-space:nowrap}
+.score.bump{animation:bump .35s ease}
+@keyframes bump{30%{transform:scale(1.12);color:var(--accent)}}
+.theme{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--fg);cursor:pointer;font-size:13px;font-weight:600;transition:transform .15s}
+.theme:hover{transform:translateY(-1px)}
+.theme svg{width:16px;height:16px}
+section{margin-top:28px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);transition:background-color .35s ease,border-color .35s ease}
+.hero{padding:28px 26px;display:grid;gap:18px;position:relative;overflow:hidden}
+.lead{font-size:18px;max-width:62ch}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-family:var(--mono);font-size:12.5px;padding:4px 9px;border-radius:3px;border:1px solid var(--line);color:var(--fg);background:var(--surface-2)}
+.howto{display:grid;gap:10px;padding:18px 20px;margin-top:16px}
+.howto ol{margin:0;padding-left:0;list-style:none;display:grid;gap:10px}
+.howto li{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:start}
+.howto li b{font-family:var(--mono);font-weight:500;color:var(--accent-2);padding-top:2px}
+.kbd{font-family:var(--mono);font-size:12px;padding:1px 6px;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;background:var(--surface-2)}
+.panel{padding:18px 20px;margin-top:16px;display:grid;gap:16px}
+.field{display:grid;gap:6px}
+.field label{font-size:13px;color:var(--muted);font-weight:600}
+.field input{padding:12px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface-2);color:var(--fg);font:inherit;font-size:16px;transition:border-color .15s,box-shadow .15s}
+.field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);outline:none}
+.field input.err{border-color:var(--bad);animation:shake .4s}
+.field .help{font-size:13px;color:var(--muted)}
+.field .help.err{color:var(--bad)}
+.filters{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.filters label{display:grid;gap:5px;font-size:13px;color:var(--muted);min-width:0;font-weight:600}
+select,button{font:inherit}
+select{padding:10px 12px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface-2);color:var(--fg);width:100%;font-weight:400;font-size:15px}
+.seg{display:flex;gap:6px;background:var(--surface-2);padding:4px;border-radius:var(--r);border:1px solid var(--line)}
+.seg button{flex:1;padding:8px 10px;border:0;border-radius:7px;background:transparent;color:var(--muted);font-weight:600;cursor:pointer;font-size:14px;transition:background .2s,color .2s,transform .15s}
+.seg button.on{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.14)}
+.seg button:active{transform:scale(.97)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;border-radius:var(--r);border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);font-weight:600;cursor:pointer;transition:transform .15s cubic-bezier(.2,.8,.2,1),box-shadow .15s,background .2s}
+.btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 14px rgba(35,56,118,.22)}
+.btn:active:not(:disabled){transform:translateY(0) scale(.98)}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.ghost:hover:not(:disabled){box-shadow:none;background:var(--accent-soft)}
+.btn.subtle{background:transparent;border-color:var(--line);color:var(--muted)}
+.btn.subtle:hover:not(:disabled){box-shadow:none;background:var(--surface-2)}
+.btn.big{padding:14px 26px;font-size:17px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:focus-visible,select:focus-visible,.opt:focus-visible,.seg button:focus-visible,summary:focus-visible,.theme:focus-visible{outline:3px solid var(--accent-2);outline-offset:2px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.stat{padding:12px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface-2);animation:rise .4s ease both}
+.stat:nth-child(2){animation-delay:.05s}.stat:nth-child(3){animation-delay:.1s}.stat:nth-child(4){animation-delay:.15s}
+.stat b{display:block;font-family:var(--display);font-size:26px;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat span{font-size:13px;color:var(--muted)}
+.qwrap{animation:rise .35s cubic-bezier(.2,.8,.2,1)}
+.qwrap.out{animation:fall .18s ease forwards}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes fall{to{opacity:0;transform:translateY(-8px)}}
+.qcard{padding:22px 24px 20px;display:grid;gap:16px}
+.qhead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.qmeta{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.tag{font-family:var(--mono);font-size:11.5px;padding:3px 8px;border-radius:3px;background:var(--accent-soft);color:var(--fg)}
+.tag.src{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.tag.d1{background:var(--ok-soft)} .tag.d2{background:var(--warn-soft)} .tag.d3{background:var(--bad-soft)}
+.qcount{font-family:var(--display);font-weight:700;font-size:15px;color:var(--muted);white-space:nowrap}
+.qtext{white-space:pre-line;max-width:70ch}
+.qtext .comando{font-weight:600;display:block;margin-top:10px}
+.itens{display:grid;gap:8px;padding-left:0;margin:0;list-style:none;max-width:70ch}
+.itens li{display:grid;grid-template-columns:34px 1fr;gap:6px}
+.itens li .rn{font-family:var(--mono);font-weight:600;color:var(--muted)}
+.itens li.porque{grid-template-columns:1fr;font-family:var(--mono);font-size:13px;letter-spacing:.1em;color:var(--muted);padding-left:34px}
+.pergunta{font-weight:600}
+.opts{display:grid;gap:9px;margin:0;padding:0;list-style:none}
+.opts li{animation:rise .4s ease both}
+.opts li:nth-child(2){animation-delay:.04s}.opts li:nth-child(3){animation-delay:.08s}.opts li:nth-child(4){animation-delay:.12s}.opts li:nth-child(5){animation-delay:.16s}
+.opt{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start;text-align:left;width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface-2);color:var(--fg);cursor:pointer;line-height:1.45;transition:border-color .18s,background .25s,transform .18s cubic-bezier(.2,.8,.2,1),box-shadow .18s}
+.opt .l{font-family:var(--mono);font-weight:600;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);transition:background .2s,color .2s,transform .2s}
+.opt:hover:not(:disabled){border-color:var(--accent);transform:translateX(3px)}
+.opt:hover:not(:disabled) .l{transform:scale(1.08)}
+.opt:active:not(:disabled){transform:translateX(4px) scale(.99)}
+.opt.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--accent-soft);animation:pop .3s cubic-bezier(.2,.8,.2,1)}
+.opt.sel .l{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+@keyframes pop{40%{transform:scale(1.02)}}
+.opt:disabled{cursor:default;transform:none}
+.opt.right{border-color:var(--ok);background:var(--ok-soft);animation:pop .4s cubic-bezier(.2,.8,.2,1)} .opt.right .l{background:var(--ok);color:#fff;border-color:var(--ok)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft);animation:shake .45s} .opt.wrong .l{background:var(--bad);color:#fff;border-color:var(--bad)}
+@keyframes shake{20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+.opt.dim{opacity:.55}
+.feedback{border-left:3px solid var(--line);padding:14px 16px;border-radius:0 var(--r) var(--r) 0;background:var(--surface-2);display:grid;gap:8px;animation:unfold .35s cubic-bezier(.2,.8,.2,1);transform-origin:top}
+@keyframes unfold{from{opacity:0;transform:translateY(-6px) scaleY(.96)}to{opacity:1;transform:none}}
+.feedback.ok{border-color:var(--ok)} .feedback.bad{border-color:var(--bad)}
+.feedback .verdict{font-family:var(--display);font-weight:700;font-size:17px}
+.feedback.ok .verdict{color:var(--ok)} .feedback.bad .verdict{color:var(--bad)}
+.feedback .fonte{font-size:13px;color:var(--muted)}
+.feedback a,.rev a,.fontes a,.painel a{color:var(--accent)}
+.nav{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.nav .left{display:flex;gap:8px;flex-wrap:wrap}
+.hint{font-size:13px;color:var(--muted);margin-top:10px}
+.result{display:grid;gap:16px}
+.ring{display:grid;grid-template-columns:120px 1fr;gap:18px;align-items:center;padding:20px 22px}
+.ring svg{width:120px;height:120px}
+.ring circle.v{transition:stroke-dashoffset 1.1s cubic-bezier(.2,.8,.2,1)}
+.ring .big{font-family:var(--display);font-size:34px;font-weight:800;line-height:1}
+.save{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px;color:var(--muted)}
+.save .dot{width:9px;height:9px;border-radius:50%;background:var(--warn)}
+.save.ok .dot{background:var(--ok)} .save.bad .dot{background:var(--bad)}
+.bars{display:grid;gap:10px;padding:18px 20px}
+.bar{display:grid;grid-template-columns:minmax(0,1fr) 100px;gap:10px;align-items:center;font-size:14px}
+.bar .track{height:10px;background:var(--line);border-radius:999px;overflow:hidden;margin-top:4px}
+.bar .track i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:999px;transform-origin:left;animation:grow .9s cubic-bezier(.2,.8,.2,1) both}
+@keyframes grow{from{transform:scaleX(0)}}
+.bar .n{font-family:var(--mono);font-size:12px;font-variant-numeric:tabular-nums;color:var(--muted);text-align:right}
+.revisao{display:grid;gap:8px}
+.rev{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);font-size:15px;overflow:hidden;transition:box-shadow .2s}
+.rev[open]{box-shadow:var(--shadow)}
+.rev summary{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px 14px;cursor:pointer;list-style:none}
+.rev summary::-webkit-details-marker{display:none}
+.rev .k{font-family:var(--mono);font-weight:700;width:24px;height:24px;border-radius:7px;display:grid;place-items:center;font-size:13px}
+.rev.ok .k{background:var(--ok-soft);color:var(--ok)} .rev.bad .k{background:var(--bad-soft);color:var(--bad)} .rev.skip .k{background:var(--warn-soft);color:var(--warn)}
+.rev .g{font-family:var(--mono);font-size:12px;white-space:nowrap;color:var(--muted)}
+.rev .body{padding:12px 14px 14px;display:grid;gap:8px;border-top:1px solid var(--line);font-size:15px;animation:unfold .3s ease}
+.rev .body .q{white-space:pre-line;color:var(--muted);font-size:14px}
+.rev li.right{color:var(--ok);font-weight:600} .rev li.wrong{color:var(--bad)}
+.fontes{display:grid;gap:12px;padding-left:0;list-style:none}
+.fontes li{display:grid;gap:3px;padding:14px 16px}
+.fontes a{word-break:break-all;font-size:14px}
+.painel table{width:100%;border-collapse:collapse;font-size:14px}
+.painel th,.painel td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line)}
+.painel th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono)}
+.painel td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
+.painel tr{animation:rise .4s ease both}
+footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-size:14px;color:var(--muted);display:grid;gap:6px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;z-index:20;box-shadow:var(--shadow);animation:rise .3s ease}
+.tscroll{overflow-x:auto}
+@media (max-width:520px){.rev summary{grid-template-columns:28px 1fr}.rev .g{grid-column:2;white-space:normal}.qcard{padding:18px 16px}.hero{padding:22px 18px}.ring{grid-template-columns:1fr;justify-items:center;text-align:center}}
+</style>
+
+<div class="bgfx" aria-hidden="true">
+  <div class="grid"></div>
+  <svg class="w1" viewBox="0 0 2880 300" preserveAspectRatio="none"><path fill="var(--wave1)" d="M0,150 C240,60 480,60 720,150 C960,240 1200,240 1440,150 C1680,60 1920,60 2160,150 C2400,240 2640,240 2880,150 L2880,300 L0,300 Z"/></svg>
+  <svg class="w2" viewBox="0 0 2880 300" preserveAspectRatio="none"><path fill="var(--wave2)" d="M0,170 C180,100 360,100 540,170 C720,240 900,240 1080,170 C1260,100 1440,100 1620,170 C1800,240 1980,240 2160,170 C2340,100 2520,100 2700,170 C2760,195 2820,195 2880,170 L2880,300 L0,300 Z"/></svg>
+  <svg class="w3" viewBox="0 0 2880 300" preserveAspectRatio="none"><path fill="var(--wave3)" d="M0,120 C360,20 720,20 1080,120 C1440,220 1800,220 2160,120 C2400,53 2640,53 2880,120 L2880,300 L0,300 Z"/></svg>
+</div>
+<div class="glow" id="glow" aria-hidden="true"></div>
+
+<header class="top"><div class="in">
+  <div class="brand">Infra, Redes & Segurança<small>Grupo 4 · Revisão Enade · Sistemas de Informação</small></div>
+  <div class="leds" role="progressbar" aria-label="Progresso do simulado" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="pwrap" title="Uma luz por questão: verde acertou, cobre errou, cinza pulou"></div>
+  <div class="score" id="scoreTop">Pronto para começar</div>
+  <button type="button" class="theme" id="themeBtn" aria-label="Alternar tema"><span id="themeIcon"></span><span id="themeLabel">Auto</span></button>
+</div></header>
+
+<div class="wrap">
+<section id="viewIntro">
+  <div class="card hero">
+    <div>
+      <p class="eyebrow">Grupo 4 · Infraestrutura, redes e segurança</p>
+      <h1 style="margin-top:6px">Quiz de Infraestrutura, Redes e Segurança</h1>
+    </div>
+    <p class="lead">27 questões que caíram no Enade de 2017 e 2021, sobre redes, sistemas operacionais, arquitetura, nuvem, segurança e infraestrutura. Você responde, vê na hora onde errou e por quê, e pode conferir a prova original no site do Inep.</p>
+    <div class="chips" id="chips"></div>
+  </div>
+
+  <div class="card howto">
+    <h3>Como usar</h3>
+    <ol>
+      <li><b>1</b><span>Escreva seu nome ou apelido. É assim que você aparece no painel da turma.</span></li>
+      <li><b>2</b><span>No modo <strong>Estudo</strong> a explicação aparece depois de cada resposta. No <strong>Simulado</strong> a correção fica para o fim, como no dia da prova.</span></li>
+      <li><b>3</b><span>Se quiser treinar só um assunto, use os filtros. Sem filtro, vêm as 27.</span></li>
+      <li><b>4</b><span>Responda tocando na alternativa ou pelas teclas <span class="kbd">A</span> a <span class="kbd">E</span>; <span class="kbd">Enter</span> avança. No fim você revê cada questão e manda o resultado para a turma.</span></li>
+    </ol>
+    <p class="hint" id="hist"></p>
+  </div>
+
+  <div class="card panel">
+    <div class="field">
+      <label for="nome">Seu nome</label>
+      <input id="nome" type="text" maxlength="40" autocomplete="name" placeholder="Ex.: Ana Souza" aria-describedby="nomeHelp">
+      <span class="help" id="nomeHelp">Pode ser só o primeiro nome ou as iniciais.</span>
+    </div>
+    <div>
+      <div class="muted" style="font-size:13px;font-weight:600;margin-bottom:6px">Modo</div>
+      <div class="seg" role="group" aria-label="Modo"><button type="button" class="on" id="modeEstudo">Estudo · retorno imediato</button><button type="button" id="modeSimulado">Simulado · correção no final</button></div>
+    </div>
+    <div class="filters">
+      <label>Conteúdo <select id="fConteudo"><option value="">Todos</option></select></label>
+      <label>Dificuldade <select id="fDif"><option value="">Todas</option><option>Fácil</option><option>Médio</option><option>Difícil</option></select></label>
+      <label>Prova <select id="fProva"><option value="">Todas</option></select></label>
+      <label>Ordem <select id="fOrdem"><option value="aleatoria">Aleatória</option><option value="original">Por prova e número</option></select></label>
+    </div>
+    <p class="muted" id="statsIntro" style="font-size:14px"></p>
+    <div class="actions">
+      <button class="btn big" id="btnStart">Começar</button>
+      <button class="btn ghost" id="btnPainel" hidden>Painel da turma</button>
+      <button class="btn ghost" id="btnFontes">Fontes das questões</button>
+    </div>
+  </div>
+</section>
+
+<section id="viewQuiz" hidden>
+  <div class="qwrap" id="qwrap"><div class="card qcard" id="qcard"></div></div>
+  <div class="nav">
+    <div class="left">
+      <button class="btn subtle" id="btnQuit">Encerrar e ver resultado</button>
+      <button class="btn subtle" id="btnSkip">Pular</button>
+    </div>
+    <button class="btn" id="btnNext" disabled>Próxima →</button>
+  </div>
+  <p class="hint">Atalhos: <span class="kbd">A</span>–<span class="kbd">E</span> ou <span class="kbd">1</span>–<span class="kbd">5</span> para responder · <span class="kbd">Enter</span> para avançar</p>
+</section>
+
+<section id="viewResult" hidden class="result">
+  <div>
+    <p class="eyebrow">Resultado</p>
+    <h2 id="resTitle" style="margin-top:6px"></h2>
+  </div>
+  <div class="card ring" id="ring"></div>
+  <div class="save" id="saveStatus"></div>
+  <div class="stats" id="statsRes"></div>
+  <div class="card bars" id="bars"></div>
+  <div>
+    <h3 style="margin-bottom:10px">Revisão das questões</h3>
+    <div class="revisao" id="revisao"></div>
+  </div>
+  <div class="actions">
+    <button class="btn" id="btnAgain">Novo simulado</button>
+    <button class="btn ghost" id="btnReview">Refazer só as que errei</button>
+    <button class="btn subtle" id="btnCopy">Copiar resumo</button>
+    <a class="btn subtle" id="btnWa" target="_blank" rel="noopener">Enviar no WhatsApp</a>
+    <a class="btn subtle" id="btnForm" target="_blank" rel="noopener" hidden>Avaliar o quiz (formulário)</a>
+  </div>
+</section>
+
+<section id="viewPainel" hidden class="painel">
+  <p class="eyebrow">Painel da turma</p>
+  <h2 style="margin-top:6px">Quem já fez o quiz</h2>
+  <p class="muted" style="margin-top:8px;max-width:65ch">Melhor aproveitamento, número de tentativas e data da última, de quem respondeu com o nome preenchido.</p>
+  <div class="card tscroll" style="margin-top:14px"><div id="painelBody" style="padding:6px 4px"></div></div>
+  <div class="actions" style="margin-top:14px"><button class="btn ghost" id="btnBackIntro2">← Voltar</button><button class="btn subtle" id="btnPainelCsv">Copiar como planilha (CSV)</button></div>
+</section>
+
+<section id="viewFontes" hidden>
+  <p class="eyebrow">Fontes</p>
+  <h2 style="margin-top:6px">Provas utilizadas</h2>
+  <p style="margin-top:10px;max-width:65ch">Todas as questões vêm das provas do Enade (Inep/MEC). Conferimos cada gabarito no gabarito definitivo publicado pelo Inep. Em cada questão aparecem a prova, o ano e o número original.</p>
+  <ul class="fontes" id="fontesList" style="margin-top:14px"></ul>
+  <div class="actions" style="margin-top:14px"><button class="btn ghost" id="btnBackIntro">← Voltar</button></div>
+</section>
+
+<footer>
+  <span>Atividade Extensionista Curricularizada · Tópicos em Sistemas de Informação (8º período) · Profª Clarete Aparecida Diniz Gomes.</span>
+  <span>Grupo 4: Thiago Henrique Alves Cotrin, Iago de Souza Andrade e Pedro Henrique Silveira Fonseca.</span>
+  <span>Questões: Enade/Inep, uso educacional. Nome e histórico ficam neste navegador e, quando o acesso permite, no painel da turma.</span>
+</footer>
+</div>
+
+<script id="data" type="application/json">{"provas": {"SI2017": {"nome": "Enade 2017 — Sistemas de Informação (bacharelado)", "sigla": "Enade 2017 · SI", "prova": "https://www.gov.br/inep/pt-br/areas-de-atuacao/avaliacao-e-exames-educacionais/enade/provas-e-gabaritos/2017", "gabarito": "https://download.inep.gov.br/educacao_superior/enade/gabaritos/2017/40_Sistemas_de_Informacao.pdf"}, "CC2017": {"nome": "Enade 2017 — Ciência da Computação (bacharelado)", "sigla": "Enade 2017 · CC", "prova": "https://download.inep.gov.br/educacao_superior/enade/provas/2017/03_CIE_COM_BACHAREL_BAIXA.pdf", "gabarito": "https://download.inep.gov.br/educacao_superior/enade/gabaritos/2017/03_Ciencia_da_Computacao_Bacharelado.pdf"}, "SI2021": {"nome": "Enade 2021 — Sistemas de Informação (bacharelado)", "sigla": "Enade 2021 · SI", "prova": "https://download.inep.gov.br/enade/provas_e_gabaritos/2021_PV_bacharelado_sistema_informacao.pdf", "gabarito": "https://download.inep.gov.br/enade/provas_e_gabaritos/2021_GB_bacharelado_sistema_informacao.pdf"}, "RC2021": {"nome": "Enade 2021 — Tecnologia em Redes de Computadores", "sigla": "Enade 2021 · Redes", "prova": "https://download.inep.gov.br/enade/provas_e_gabaritos/2021_PV_tecnologia_redes_computadores.pdf", "gabarito": "https://download.inep.gov.br/enade/provas_e_gabaritos/2021_GB_tecnologia_redes_computadores.pdf"}}, "conteudos": ["Redes de computadores", "Sistemas operacionais", "Arquitetura de computadores", "Computação em nuvem", "Segurança da informação", "Infraestrutura de TI"], "questoes": [{"id": 1, "prova": "SI2017", "numero": 12, "conteudo": "Infraestrutura de TI", "dificuldade": "Fácil", "texto": "A TI Verde está associada à utilização eficiente dos recursos organizacionais e à minimização dos efeitos nocivos ao meio ambiente ocasionados pelo uso da Tecnologia da Informação (TI). Essas tecnologias são feitas de produtos químicos, metais pesados, materiais sintéticos etc. Considerando que existirão 10 bilhões de pessoas no nosso planeta em 2050, teremos que gerir tanto o impacto ambiental da tecnologia, quanto usar esta mesma tecnologia para ajudar a gerenciar o impacto da espécie humana no planeta.", "comando": "A partir dessas informações e considerando o conceito de TI Verde, avalie as afirmações a seguir.", "itens": ["Um dos pilares da TI Verde é a busca de conscientização do usuário na adoção de ações sustentáveis, tais como: reduzir impressões inúteis economizando papel e tinta/toner e evitar o envio desnecessário de e-mails reduzindo o gasto de energia do sistema e do receptor.", "Na linha de eficiência energética estão os data centers verdes, nos quais a virtualização de servidores pode ser utilizada para fazer com que uma única máquina física, considerando sua capacidade de processamento, emule diversas máquinas.", "Um equívoco comum é considerar ações relativas ao lixo eletrônico como ações de TI Verde a serem adotadas pela organização, pois essas questões estão fora de sua governança."], "pergunta": "É correto o que se afirma em", "alternativas": ["I, apenas.", "III, apenas.", "I e II, apenas.", "II e III, apenas.", "I, II e III."], "gabarito": "C", "explicacao": "As afirmações I e II descrevem corretamente dois pilares da TI Verde: a conscientização do usuário (redução de impressões e de e-mails desnecessários) e a eficiência energética em data centers, na qual a virtualização permite que um único servidor físico hospede várias máquinas virtuais, reduzindo consumo de energia, espaço e refrigeração. A afirmação III está errada: o descarte adequado do lixo eletrônico (e-waste) é justamente uma das ações centrais da TI Verde e está, sim, dentro da governança da organização."}, {"id": 2, "prova": "SI2017", "numero": 22, "conteudo": "Sistemas operacionais", "dificuldade": "Médio", "texto": "A tendência atual de desenvolver aplicações que possam ser utilizadas em nuvem otimiza o desempenho de máquinas locais, munidas de poucos recursos computacionais, em uma rede e garante a possibilidade desses computadores utilizarem outros recursos computacionais de maior desempenho, bem como a inserção de novos hosts neste ambiente computacional, sem comprometimento do sistema como um todo.", "comando": "Esse cenário pressupõe a utilização de sistema operacional com", "itens": [], "pergunta": "", "alternativas": ["arquitetura monolítica.", "arquiteturas em camadas.", "arquitetura monocamadas.", "arquiteturas cliente-servidor.", "arquiteturas de máquinas virtuais."], "gabarito": "D", "explicacao": "O cenário descreve máquinas locais com poucos recursos (clientes) que consomem serviços de máquinas de maior desempenho (servidores) pela rede, com possibilidade de incluir novos hosts sem comprometer o sistema. Essa é a característica da arquitetura cliente-servidor de sistemas operacionais (modelo microkernel/distribuído), em que os serviços rodam como processos servidores e os clientes os solicitam por troca de mensagens. As arquiteturas monolítica e em camadas descrevem apenas a organização interna do núcleo em uma única máquina, e a arquitetura de máquinas virtuais trata da virtualização de hardware, não do compartilhamento de recursos em rede."}, {"id": 3, "prova": "SI2017", "numero": 31, "conteudo": "Computação em nuvem", "dificuldade": "Médio", "texto": "A cloud computing (computação em nuvem) tem o objetivo de fornecer recursos de hardware e software sob demanda a partir de servidores interligados pela internet, seguindo o princípio da computação em grid (grade). Uma arquitetura em grid é descrita por meio das quatro camadas a seguir.\n• Rede: executa a comunicação e se utiliza da parte física;\n• Recursos: formada pelos servidores de armazenamento e/ou processamento;\n• Middleware: formada pelo software responsável pela troca de informações;\n• Ferramentas e aplicações: representada pelos aplicativos.", "comando": "De acordo com o texto, avalie as afirmações a seguir.", "itens": ["A camada de ferramentas e aplicações é responsável pela negociação das transações de dados no grid.", "A camada middleware é responsável pela interconectividade e comunicação entre os membros do grid.", "A camada de rede é responsável pela conectividade entre os diferentes membros do grid.", "A camada de recursos é responsável pela segurança dos dados nas aplicações do grid."], "pergunta": "É correto apenas o que se afirma em", "alternativas": ["I e II.", "II e III.", "III e IV.", "I, II e IV.", "I, III e IV."], "gabarito": "B", "explicacao": "Pelo próprio texto, o middleware é o software responsável pela troca de informações (II correta) e a camada de rede executa a comunicação física entre os membros (III correta). A afirmação I está errada porque a negociação das transações é função do middleware, não dos aplicativos; a IV está errada porque a camada de recursos reúne servidores de armazenamento e processamento, e não é a responsável pela segurança dos dados."}, {"id": 4, "prova": "SI2017", "numero": 33, "conteudo": "Segurança da informação", "dificuldade": "Fácil", "texto": "Tendo em vista que a informação está entre os bens mais importantes para uma organização, um dos fatores decisivos na definição de uma rede de computadores é a segurança da informação. Para garantir tal segurança e evitar qualquer desvio ou ação que possa modificar essas informações sem autorização ou, ainda, para protegê-las de ataques cibernéticos, são necessários planejamentos e estruturação da rede e de seus acessos. (FONTES, E. Praticando a segurança da informação. São Paulo: Brasport, 2008, adaptado.)", "comando": "Considerando o texto, avalie as afirmações a seguir.", "itens": ["A proteção da informação em uma organização é competência restrita à área de tecnologia, que assume total responsabilidade sobre sua segurança.", "A proteção da informação exige postura e comprometimento dos envolvidos na sua execução, portanto, deve ser tratada de forma profissional.", "A presença de funcionários éticos na empresa elimina a necessidade de investimentos na área de segurança da informação.", "Os ataques cibernéticos são cada dia mais frequentes, por isso, a segurança da informação deve ser considerada essencial."], "pergunta": "É correto o que se afirma em", "alternativas": ["I e II.", "I e III.", "II e IV.", "I, III e IV.", "II, III e IV."], "gabarito": "C", "explicacao": "Segurança da informação é responsabilidade de toda a organização (pessoas, processos e tecnologia), não apenas da área de TI — por isso I está errada. Funcionários éticos reduzem riscos, mas não eliminam ameaças externas, falhas técnicas e erros humanos; logo, III também está errada. As afirmações II (comprometimento e profissionalismo dos envolvidos) e IV (crescimento dos ataques torna a segurança essencial) estão corretas."}, {"id": 5, "prova": "SI2017", "numero": 34, "conteudo": "Arquitetura de computadores", "dificuldade": "Médio", "texto": "No contexto de arquitetura e organização de computadores, o termo cluster é usado para designar um grupo de computadores interconectados, trabalhando como um recurso de computação unificado. Cada computador pertencente ao cluster é usualmente denominado nó. Clusters costumam ser utilizados em ambientes corporativos, sendo particularmente adequados para aplicações baseadas em servidores. (STALLINGS, W. Arquitetura e organização de computadores. 8. ed. São Paulo: Prentice Hall, 2010, adaptado.)", "comando": "Considerando as informações apresentadas, avalie as afirmações a seguir.", "itens": ["Uma falha em um nó de um cluster implica em perda total de serviço.", "A interligação entre os nós de um cluster realiza-se por meio de um barramento de controle.", "A escalabilidade de um cluster é maior do que a de um processador com múltiplos núcleos.", "A relação custo/desempenho de um cluster é melhor do que a de uma única máquina de grande porte."], "pergunta": "É correto apenas o que se afirma em", "alternativas": ["I e III.", "II e III.", "III e IV.", "I, II e III.", "I, II e IV."], "gabarito": "C", "explicacao": "Clusters são construídos justamente para alta disponibilidade: se um nó falha, os demais continuam atendendo (I errada). Os nós são computadores completos interligados por uma rede de alta velocidade (LAN, InfiniBand etc.), e não por um barramento de controle interno (II errada). Já a escalabilidade incremental — basta acrescentar nós — é muito maior que a de um único processador multinúcleo (III correta), e o uso de máquinas convencionais oferece melhor relação custo/desempenho do que um único computador de grande porte (IV correta)."}, {"id": 6, "prova": "SI2021", "numero": 11, "conteudo": "Sistemas operacionais", "dificuldade": "Médio", "texto": "Uma empresa deseja se reposicionar no mercado e, para isso, precisa ampliar sua capacidade de atendimento em serviços computacionais. Atualmente, os sistemas infraestruturais e de informação rodam sobre Sistemas Operacionais de diversas versões e distribuições, tanto na plataforma Windows, quanto na plataforma Linux. Uma consultoria especializada propôs a migração do parque de servidores físicos para servidores virtuais, adotando-se o tipo II, ou seja, os Monitores de Máquina Virtual serão executados como processos dos Sistemas Operacionais hospedeiros, mantendo-se, a princípio, os Sistemas Operacionais do parque original como visitantes e adotando-se um único Sistema Operacional como hospedeiro.", "comando": "Sobre o modelo proposto pela consultoria, avalie as afirmações a seguir.", "itens": ["Os Sistemas Operacionais visitantes serão infectados se algum malware se instalar no Sistema Operacional hospedeiro.", "A empresa, após a virtualização, economizará recursos financeiros na aquisição de servidores e obterá mais eficiência no consumo de recursos.", "A empresa não poderá manter a mesma estrutura de Sistemas Operacionais físicos no sistema virtualizado do tipo II.", "A recuperação do Sistema Operacional virtual é mais simples e rápida, quando comparada ao sistema físico."], "pergunta": "É correto apenas o que se afirma em", "alternativas": ["I e III.", "II e III.", "II e IV.", "I, II e IV.", "I, III e IV."], "gabarito": "C", "explicacao": "O hipervisor (monitor de máquina virtual) isola os sistemas visitantes do hospedeiro; um malware no host não infecta automaticamente as VMs (I errada). A virtualização consolida vários servidores em menos máquinas físicas, reduzindo compras de hardware e melhorando o aproveitamento de CPU, memória e energia (II correta). Em um hipervisor tipo II (como VirtualBox ou VMware Workstation) é perfeitamente possível manter Windows e Linux como visitantes, preservando a estrutura original (III errada). Por fim, snapshots, clones e backups de imagens tornam a recuperação de uma VM muito mais simples e rápida que a de um servidor físico (IV correta)."}, {"id": 7, "prova": "SI2021", "numero": 12, "conteudo": "Segurança da informação", "dificuldade": "Médio", "texto": "A segurança dos dados refere-se às medidas que garantem confidencialidade, integridade e disponibilidade dos sistemas de informação e dos dados neles armazenados. É importante compreender que a segurança dos dados exige uma abordagem ampla em toda a empresa. Com base no exposto, não é possível proteger os dados se eles não forem resguardados por todos os processos que os circundam. A segurança dos dados depende de fatores como arquitetura dos sistemas, sistemas de hardware e software, rede e seus dispositivos, como também de pessoas internas e externas à organização. (ROB, P.; CORONEL, C. Sistemas de banco de dados. São Paulo: Cengage Learning, 2011, adaptado.)", "comando": "Considerando a segurança em bancos de dados, avalie as asserções a seguir e a relação proposta entre elas.", "itens": ["A confidencialidade dos dados é o que garante que eles estejam protegidos contra acesso não autorizado e em caso de acesso autorizado, que sejam utilizados apenas para a finalidade designada.", "PORQUE", "As permissões de acesso às informações contidas nos bancos de dados dependem também da disponibilidade de acesso aos dados, sempre que solicitado por usuários autorizados para finalidades autorizadas."], "pergunta": "A respeito dessas asserções, assinale a opção correta.", "alternativas": ["As asserções I e II são proposições verdadeiras, e a II é uma justificativa correta da I.", "As asserções I e II são proposições verdadeiras, mas a II não é uma justificativa correta da I.", "A asserção I é uma proposição verdadeira, e a II é uma proposição falsa.", "A asserção I é uma proposição falsa, e a II é uma proposição verdadeira.", "As asserções I e II são proposições falsas."], "gabarito": "B", "explicacao": "A asserção I define corretamente a confidencialidade (proteção contra acesso não autorizado e uso apenas para a finalidade prevista). A asserção II também é verdadeira: a disponibilidade garante que usuários autorizados consigam acessar os dados quando necessário. Porém, confidencialidade e disponibilidade são pilares distintos e independentes da tríade CID; a existência de disponibilidade não explica nem fundamenta a confidencialidade. Logo, ambas são verdadeiras, mas a II não justifica a I."}, {"id": 8, "prova": "SI2021", "numero": 16, "conteudo": "Computação em nuvem", "dificuldade": "Médio", "texto": "A computação em nuvem é caracterizada por um conjunto de recursos virtualizados e disponibilizados via internet. Os recursos podem ser configurados dinamicamente, fornecendo a base para a escalabilidade sob demanda. O vínculo com a computação em nuvem geralmente se baseia em um modelo de pagamento por uso, no qual as garantias são oferecidas por meio de SLAs (acordos de nível de serviço) personalizados. Os provedores de computação em nuvem oferecem essas camadas aos clientes por meio de várias interfaces, levando a três tipos diferentes de serviços: Infraestrutura como Serviço (IaaS); Plataforma como Serviço (PaaS); Software como Serviço (SaaS). (VAQUERO, L. M. et al. A Break in the Clouds: Towards a Cloud Definition. ACM SIGCOMM CCR, 2009, adaptado.)", "comando": "Considerando as informações apresentadas, avalie as afirmações a seguir.", "itens": ["O uso do IaaS é recomendado para pequenas e médias empresas cujo crescimento da infraestrutura não acompanha sua expansão, bem como para empresas que possuem demandas oscilantes, como lojas virtuais.", "O uso de IaaS e SaaS não é recomendado quando há restrições legais quanto ao armazenamento ou terceirização dos dados, como ocorre muitas vezes em empresas e autarquias públicas.", "O uso de SaaS é recomendado para grandes empresas que estão dispostas a investir em grande escala na compra de licenças.", "O uso de PaaS não é indicado para empresas que possuem um time próprio de desenvolvedores."], "pergunta": "É correto apenas o que se afirma em", "alternativas": ["I e II.", "I e III.", "III e IV.", "I, II e IV.", "II, III e IV."], "gabarito": "A", "explicacao": "IaaS permite contratar servidores, armazenamento e rede sob demanda, ideal para empresas em crescimento ou com demanda sazonal (I correta). Quando a lei exige que os dados fiquem sob custódia própria ou em território específico, terceirizar armazenamento em nuvem pública pode ser inviável (II correta). SaaS é vendido por assinatura/uso — não envolve compra de licenças em grande escala; é indicado justamente para quem não quer gerir infraestrutura nem software (III errada). PaaS é voltado exatamente para equipes de desenvolvimento, que ganham uma plataforma pronta para construir e implantar aplicações (IV errada)."}, {"id": 9, "prova": "SI2021", "numero": 17, "conteudo": "Redes de computadores", "dificuldade": "Médio", "texto": "O funcionamento da internet está baseado no roteamento de pacotes do tipo IP (Internet Protocol).", "comando": "Com relação a este protocolo e aos equipamentos utilizados para roteá-lo, avalie as afirmações a seguir.", "itens": ["Um pacote IPv4 pode ficar em loop indefinidamente, caso haja erros nas tabelas de roteamentos dos roteadores.", "Em uma intranet com mais de um roteador, o sequenciamento de pacotes IPv4 é garantido por meio do campo TTL.", "Um pacote IPv4 pode ser fragmentado por qualquer dispositivo na rede, se o tamanho máximo de MTU da rede onde os pacotes vão transitar for menor que o tamanho do pacote a ser transmitido.", "Ao enviar um pacote IPv4, a máscara de subrede é utilizada pelo computador ou roteador para identificar se o computador de destino pertence a esta mesma subrede."], "pergunta": "É correto apenas o que se afirma em", "alternativas": ["I e II.", "I e III.", "III e IV.", "I, II e IV.", "II, III e IV."], "gabarito": "C", "explicacao": "O campo TTL (Time To Live) do cabeçalho IPv4 é decrementado a cada salto e, ao chegar a zero, o pacote é descartado — por isso um pacote nunca fica em loop indefinidamente (I errada). O TTL não tem relação com sequenciamento; o IP não garante ordem de entrega, função que cabe ao TCP (II errada). No IPv4, qualquer roteador no caminho pode fragmentar um pacote maior que o MTU do próximo enlace (III correta). A máscara de sub-rede, combinada ao endereço de destino por operação AND, indica se o destino está na mesma rede local ou se o pacote deve ir ao gateway (IV correta)."}, {"id": 10, "prova": "SI2021", "numero": 19, "conteudo": "Infraestrutura de TI", "dificuldade": "Fácil", "texto": "O gerenciamento de serviços de TI tem como objetivo a entrega e o suporte de serviços de TI focados nas necessidades dos clientes e alinhados à estratégia de negócio da organização. Esta visa alcançar custos e desempenho desejados pelo cliente, por meio de acordos de nível de serviço estabelecidos internamente entre a área de TI e as demais áreas envolvidas na cadeia do serviço. (MAGALHÃES, L. et al. Gerenciamento de Serviços de TI na Prática: uma abordagem com base na ITIL. São Paulo: Novatec, 2007, adaptado.)", "comando": "A partir das informações do texto, avalie as asserções a seguir e a relação proposta entre elas.", "itens": ["O acordo de nível de serviço é um contrato firmado entre o provedor de serviços de TI e seus clientes, que incluem detalhes de quais serviços serão fornecidos.", "PORQUE", "Os serviços devem ser monitorados quanto ao desempenho e disponibilidade no nível em que for acordado entre as partes."], "pergunta": "A respeito dessas asserções, assinale a opção correta.", "alternativas": ["As asserções I e II são proposições verdadeiras, e a II é uma justificativa correta da I.", "As asserções I e II são proposições verdadeiras, mas a II não é uma justificativa correta da I.", "A asserção I é uma proposição verdadeira, e a II é uma proposição falsa.", "A asserção I é uma proposição falsa, e a II é uma proposição verdadeira.", "As asserções I e II são proposições falsas."], "gabarito": "A", "explicacao": "O SLA (Service Level Agreement) é de fato o acordo formal entre provedor e cliente que descreve os serviços, metas de desempenho e disponibilidade (I verdadeira). Esses níveis só fazem sentido se forem medidos e monitorados continuamente, comparando o que foi entregue com o que foi acordado (II verdadeira). A necessidade de monitorar o cumprimento das metas é exatamente o que justifica a formalização do SLA; portanto a II é uma justificativa correta da I."}, {"id": 11, "prova": "SI2021", "numero": 25, "conteudo": "Segurança da informação", "dificuldade": "Fácil", "texto": "Em conformidade com a ABNT NBR ISO/IEC 27002 (2013), segurança da informação envolve práticas e processos de proteção e salvaguarda dos ativos da informação e de tecnologias da informação. Está amparada pelos preceitos de integridade, disponibilidade e confidencialidade. Segurança da informação também pode ser entendida como uma área do conhecimento dedicada à proteção de ativos da informação contra acessos não autorizados e alterações indevidas. Além disso, ela aborda a proteção da informação contra vários tipos de ameaças, implicando na possível continuidade do negócio, na minimização do risco e na maximização do retorno sobre os investimentos e oportunidades.", "comando": "Considerando o texto apresentado, avalie as afirmações a seguir.", "itens": ["A integridade da informação tem como objetivo garantir a acessibilidade da informação.", "A disponibilidade garante que os autorizados a acessarem a informação possam fazê-lo sempre que necessário.", "A confidencialidade da informação é a garantia de que somente pessoas autorizadas terão acesso a ela, protegendo-a de acordo com o grau de sigilo do seu conteúdo.", "A legalidade é a garantia de que a informação foi produzida em conformidade com a lei.", "A autenticidade é a garantia de que em um processo de comunicação os remetentes sejam exatamente quem dizem ser."], "pergunta": "É correto apenas o que se afirma em", "alternativas": ["I e II.", "I e IV.", "II, III e V.", "I, III, IV e V.", "II, III, IV e V."], "gabarito": "E", "explicacao": "A afirmação I troca os conceitos: integridade garante que a informação não seja alterada de forma indevida ou não autorizada; quem garante a acessibilidade é a disponibilidade. As demais definições estão corretas: disponibilidade (II), confidencialidade (III), legalidade — conformidade com a legislação (IV) — e autenticidade, que assegura a identidade de quem envia a informação (V)."}, {"id": 12, "prova": "SI2021", "numero": 27, "conteudo": "Infraestrutura de TI", "dificuldade": "Difícil", "texto": "Suponha que um gestor de TI de determinada empresa está avaliando o desempenho de infraestrutura com o objetivo de evitar despesas desnecessárias em aumento de capacidade. Ele identifica que o servidor da base de dados do sistema mais solicitado realiza uma média de 4,5 operações de I/O por transação, sendo que cada I/O realizado no disco consome em média 20 ms. Em uma hora, ele observa que 7 200 transações foram executadas.", "comando": "Com base nas informações apresentadas, o gestor concluiu que o throughput médio do disco (em transações por segundo) e a utilização média do disco (em valor percentual) são, respectivamente,", "itens": [], "pergunta": "", "alternativas": ["2 e 1,8.", "2 e 18.", "9 e 2.", "9 e 18.", "15 e 9."], "gabarito": "D", "explicacao": "Primeiro, a taxa de transações: 7 200 transações ÷ 3 600 s = 2 transações/s. Como cada transação gera 4,5 operações de I/O, o disco atende 2 × 4,5 = 9 operações de I/O por segundo — esse é o throughput do disco (9). A utilização é a fração do tempo em que o disco está ocupado: 9 operações/s × 0,020 s por operação = 0,18, ou seja, 18%. Esse raciocínio (lei da utilização: U = X × S) é a base da análise de desempenho e do planejamento de capacidade."}, {"id": 13, "prova": "CC2017", "numero": 12, "conteudo": "Arquitetura de computadores", "dificuldade": "Médio", "texto": "Em um computador, a memória é a unidade funcional que armazena e recupera operações e dados. Tipicamente, a memória de um computador usa uma técnica chamada acesso aleatório, que permite o acesso a qualquer uma de suas posições (células). As memórias de acesso aleatório são divididas em células de tamanho fixo, estando cada célula associada a um identificador numérico único chamado endereço. Todos os acessos à memória referem-se a um endereço específico e deve-se sempre buscar ou armazenar o conteúdo completo de uma célula, ou seja, a célula é a unidade mínima de acesso. (SCHNEIDER, G. M.; GERSTING, J. L. An Invitation to Computer Science. 6. ed. Boston: Cengage Learning, 2009, adaptado.)", "comando": "Considerando o funcionamento de uma memória de acesso aleatório (com registrador de endereços – MAR – e registrador de dados – MDR), avalie as afirmações a seguir.", "itens": ["Se a largura do registrador de endereços da memória for de 8 bits, o tamanho máximo dessa unidade de memória será de 256 células.", "Se o registrador de dados da memória tiver 8 bits, será necessária mais que uma operação para armazenar o valor inteiro 2 024 nessa unidade de memória.", "Se o registrador de dados da memória tiver 12 bits, é possível que a largura da memória seja de 8 bits."], "pergunta": "É correto o que se afirma em", "alternativas": ["I, apenas.", "III, apenas.", "I e II, apenas.", "II e III, apenas.", "I, II e III."], "gabarito": "C", "explicacao": "Com 8 bits de endereço é possível formar 2⁸ = 256 endereços distintos, logo 256 células (I correta). Com um registrador de dados de 8 bits só é possível transferir valores de 0 a 255 em uma operação; o valor 2 024 precisa de 11 bits, então exige mais de uma operação de escrita (II correta). O registrador de dados (MDR) tem exatamente a largura da célula de memória, pois transfere o conteúdo completo de uma célula; se o MDR tem 12 bits, a largura da memória é 12 bits, e não 8 (III errada)."}, {"id": 14, "prova": "CC2017", "numero": 15, "conteudo": "Segurança da informação", "dificuldade": "Difícil", "texto": "Uma das técnicas de ataques em ambientes virtuais é denominada \"homem no meio\" (man in the middle), cujo objetivo é associar o endereço MAC do intruso ao endereço IP de um outro nó da rede — nesse caso, o ponto de acesso (Access Point – AP) wi-fi da rede. Como o AP é o gateway padrão dessa subrede sem fio, todo o tráfego originalmente direcionado ao ponto de acesso pode ser interceptado pelo intruso. Esse ataque explora deficiências conhecidas no projeto de segurança do IEEE 802.11 wi-fi. (COULOURIS, G. et al. Sistemas distribuídos: conceitos e projeto. Porto Alegre: Bookman, 2013, adaptado.)", "comando": "Considerando um ataque virtual pela técnica \"homem no meio\", por meio de Address Resolution Protocol (ARP) spoofing, avalie as afirmações a seguir.", "itens": ["O problema do compartilhamento de chave presente no projeto de segurança do AP pode ser resolvido com a utilização de um protocolo baseado em chave pública para negociar chaves individuais, como é feito no Transport Layer Security (TLS) / Secure Sockets Layer (SSL).", "O problema do desvio de tráfego causado pelo ataque de homem no meio pode ser evitado com a configuração de um firewall nos pontos de acesso que filtram tráfego entre clientes de uma mesma subrede.", "O problema da falta de autenticação dos pontos de acesso sem fio pode ser contornado, obrigando-se o ponto de acesso a fornecer um certificado que possa ser autenticado pelo uso de uma chave pública obtida de terceiros.", "A vulnerabilidade das chaves de 40 bits ou 64 bits a ataques de força bruta pode ser evitada utilizando-se um AP que permita chaves de 128 bits e limitando-se o tráfego a dispositivos compatíveis com chaves de 128 bits."], "pergunta": "É correto apenas o que se afirma em", "alternativas": ["I e II.", "I e III.", "I e IV.", "I, III e IV.", "II, III e IV."], "gabarito": "D", "explicacao": "O ARP spoofing acontece na camada de enlace: o atacante envia respostas ARP falsas e os clientes passam a associar o IP do gateway ao MAC do invasor. Um firewall no AP, que filtra tráfego IP, não impede a falsificação de ARP entre clientes da mesma sub-rede (II errada). As demais medidas atacam deficiências reais do projeto original do 802.11: negociar chaves individuais com criptografia de chave pública, como faz o TLS (I); autenticar o ponto de acesso por certificado digital verificável por uma autoridade terceira (III); e substituir chaves curtas de 40/64 bits por chaves de 128 bits, resistentes à força bruta (IV)."}, {"id": 15, "prova": "CC2017", "numero": 16, "conteudo": "Segurança da informação", "dificuldade": "Fácil", "texto": "A segurança da informação está diretamente relacionada com a proteção de um conjunto de informações, no sentido de preservar o valor que possuem para um indivíduo ou uma organização, tendo como propriedades básicas a confidencialidade, a integridade, a disponibilidade e a autenticidade. A engenharia social é definida como o conjunto de técnicas utilizadas para reunir informações, explorando a tendência humana a ignorar os sistemas de segurança. Os ataques de engenharia social implicam interação com outros indivíduos, o que evidencia o aspecto psicológico da engenharia social. (MITNICK, K. D.; SIMON, W. L. The Art of Deception. New York: Wiley, 2001, adaptado.)", "comando": "Em relação à segurança da informação, avalie as afirmações a seguir.", "itens": ["As empresas sempre estarão vulneráveis, pois o fator humano é o elo mais fraco da segurança da informação.", "A segurança da informação não é um produto e, sim, um processo.", "A ética profissional é um importante fator a ser considerado na segurança da informação."], "pergunta": "É correto o que se afirma em", "alternativas": ["I, apenas.", "II, apenas.", "I e III, apenas.", "II e III, apenas.", "I, II e III."], "gabarito": "E", "explicacao": "As três afirmações refletem princípios consolidados da área. O fator humano é o elo mais fraco — é exatamente o que a engenharia social explora, e por isso nenhuma organização é totalmente invulnerável (I). Segurança não se compra pronta: é um processo contínuo de políticas, treinamento, monitoramento e melhoria (II). E a ética profissional de quem lida com dados e sistemas é fundamental para que os controles sejam respeitados (III)."}, {"id": 16, "prova": "CC2017", "numero": 29, "conteudo": "Sistemas operacionais", "dificuldade": "Difícil", "texto": "O projetista do gerenciador de memória de um novo sistema operacional precisa escolher entre os algoritmos de substituição de páginas FIFO (First In First Out – o primeiro a entrar é o primeiro a sair) e LRU (Least Recently Used – menos recentemente usado). Para isso, avaliou o número de faltas de página obtidas em ambos os algoritmos para o tamanho de memória de 4 páginas, utilizando a sequência de acessos às páginas 1-2-3-4-1-2-5-1-2-3-4-5 de um processo e memória inicialmente vazia.", "comando": "Com base nessa simulação, avalie as asserções a seguir e a relação proposta entre elas.", "itens": ["Na simulação proposta, é possível observar que os algoritmos FIFO e LRU apresentam o mesmo desempenho.", "PORQUE", "Os parâmetros utilizados na simulação são insuficientes para determinar a diferença de funcionamento entre os algoritmos."], "pergunta": "A respeito dessas asserções, assinale a opção correta.", "alternativas": ["As asserções I e II são proposições verdadeiras, e a II é uma justificativa correta da I.", "As asserções I e II são proposições verdadeiras, mas a II não é uma justificativa correta da I.", "A asserção I é uma proposição verdadeira, e a II é uma proposição falsa.", "A asserção I é uma proposição falsa, e a II é uma proposição verdadeira.", "As asserções I e II são proposições falsas."], "gabarito": "E", "explicacao": "Simulando com 4 quadros: no FIFO, as páginas 1, 2, 3 e 4 geram 4 faltas; 1 e 2 são acertos; 5 substitui 1; depois 1 substitui 2, 2 substitui 3, 3 substitui 4, 4 substitui 5 e 5 substitui 1 — total de 10 faltas. No LRU, após as 4 faltas iniciais e os acertos de 1 e 2, a página 5 substitui a 3 (menos recentemente usada); 1 e 2 são acertos; 3 substitui 4, 4 substitui 5 e 5 substitui 1 — total de 8 faltas. Os desempenhos são diferentes (I falsa) e a simulação foi suficiente para mostrar essa diferença (II falsa)."}, {"id": 17, "prova": "CC2017", "numero": 35, "conteudo": "Sistemas operacionais", "dificuldade": "Médio", "texto": "Um programador inexperiente está desenvolvendo um sistema multithread que possui duas estruturas de dados diferentes, E1 e E2, as quais armazenam valores inteiros. O acesso concorrente a essas estruturas é controlado por semáforos. Durante sua execução, o sistema dispara as threads T1 e T2 simultaneamente. A tabela da prova apresenta, em linhas gerais, os algoritmos dessas threads: cada uma solicita acesso a uma das estruturas, realiza cálculos e, em seguida, solicita acesso à outra estrutura, em ordem inversa à da outra thread (síntese da tabela original).", "comando": "Durante a execução do referido programa, é possível que", "itens": [], "pergunta": "", "alternativas": ["não ocorra deadlock, porque a sequência de alocação dos recursos impede naturalmente o problema.", "ocorra deadlock, que pode ser evitado se o programador tomar o cuidado de não executar cálculos entre um pedido de alocação e outro.", "ocorra deadlock, sendo a probabilidade dessa ocorrência tão baixa e sua consequência tão inócua que não haverá comprometimento do programa.", "não ocorra deadlock, desde que o programador use semáforos para controlar o acesso às estruturas de dados, o que é suficiente para evitar o problema.", "ocorra deadlock, que pode ser evitado se o programador tomar o cuidado de solicitar o acesso às estruturas de dados na mesma ordem em ambas as threads."], "gabarito": "E", "explicacao": "Quando T1 obtém E1 e aguarda E2 enquanto T2 obtém E2 e aguarda E1, forma-se uma espera circular — as quatro condições de deadlock (exclusão mútua, posse e espera, não preempção e espera circular) estão presentes. Semáforos garantem exclusão mútua, mas não evitam o impasse (D errada); remover os cálculos apenas reduz a janela de tempo, sem eliminar o risco (B errada); e um deadlock trava as threads, o que não é inócuo (C errada). A solução clássica é impor uma ordem global de aquisição dos recursos: se ambas as threads sempre pedirem E1 e depois E2, a espera circular torna-se impossível."}, {"id": 18, "prova": "RC2021", "numero": 10, "conteudo": "Redes de computadores", "dificuldade": "Fácil", "texto": "Existem duas abordagens fundamentais para a construção do núcleo de uma rede: comutação de circuitos e comutação de pacotes. Nas redes comutadas por circuitos, os recursos necessários para fornecer comunicação entre os sistemas finais são reservados pela duração da sessão. Em redes comutadas por pacotes, esses recursos não são reservados; as mensagens de uma sessão usam os recursos sob demanda, sendo comutados em cada nó onde podem eventualmente precisar aguardar disponibilidade para uso de recurso. Atualmente, há um uso massivo de comutação de pacotes, como na internet e nas redes locais das empresas, entretanto, a comutação de circuito ainda é usada para aplicações específicas. (KUROSE, J. F.; ROSS, K. Redes de Computadores e a Internet. 5. ed. São Paulo: Pearson, 2010, adaptado.)", "comando": "Considerando as informações apresentadas sobre as tecnologias de comutação, assinale a opção correta.", "itens": [], "pergunta": "", "alternativas": ["A Internet, que é uma rede que usa comutação de pacotes, baseia-se em datagramas IP, em que todos os pacotes de uma transmissão percorrem um mesmo caminho até seu destino.", "As antigas redes telefônicas são exemplo de comutação de pacotes, onde a sessão de comunicação é alcançada pelo uso de links de comunicação dedicados durante toda a sessão.", "As redes comutadas por pacotes utilizam endereçamento em cada pacote de dados para a tomada de decisão em cada nó, já que não existe um caminho pré-definido ao destinatário.", "Nas redes comutadas por pacote, o fato do caminho da sessão estabelecida entre fonte e destinatário ser fixo implica que o atraso imposto aos dados, que por ele trafegam, seja o mesmo.", "Nas redes comutadas por circuito a entrega do dado não é garantida, assim para comunicações com necessidade de entrega garantida é mandatória a utilização de protocolos como o TCP."], "gabarito": "C", "explicacao": "Em redes de datagramas (como a Internet), cada pacote carrega o endereço de destino e cada roteador decide o próximo salto individualmente; pacotes da mesma transmissão podem seguir caminhos diferentes (C correta; A e D erradas). A rede telefônica tradicional é o exemplo clássico de comutação de circuitos, com recursos dedicados durante a chamada (B errada). Na comutação de circuitos a entrega é garantida pelo próprio circuito reservado, sem necessidade de TCP (E errada)."}, {"id": 19, "prova": "RC2021", "numero": 13, "conteudo": "Redes de computadores", "dificuldade": "Médio", "texto": "O protocolo de controle de transmissão, ou TCP (Transmission Control Protocol), foi projetado especificamente para oferecer um fluxo de bytes fim a fim confiável em uma rede interligada não confiável. O TCP foi projetado para se adaptar dinamicamente às propriedades da rede interligada e ser robusto diante dos muitos tipos de falhas que podem ocorrer. (TANENBAUM, A. S.; WETHERALL, D. Redes de Computadores. 5. ed. São Paulo: Pearson, 2011, adaptado.)", "comando": "A respeito das características do protocolo TCP, assinale a opção correta.", "itens": [], "pergunta": "", "alternativas": ["Inicia e encerra conexões entre duas entidades por meio do handshake de três vias.", "Possui controle de congestionamento, evitando assim a ocorrência de tráfego excessivo na rede.", "Permite a comunicação entre entidades por meio de um serviço não orientado a conexões.", "Implementa o mecanismo de janela deslizante, permitindo o compartilhamento de uma mesma conexão.", "Adapta o tamanho do segmento TCP ao tamanho do MTU da camada de enlace, evitando assim a sua fragmentação ao longo do caminho."], "gabarito": "B", "explicacao": "O TCP implementa controle de congestionamento (partida lenta, prevenção de congestionamento, recuperação rápida), reduzindo a taxa de envio quando detecta perdas, o que evita sobrecarregar a rede (B correta). O handshake de três vias é usado apenas para abrir a conexão; o encerramento usa troca de FIN/ACK em quatro etapas (A errada). O TCP é orientado a conexão — quem não é orientado a conexão é o UDP (C errada). A janela deslizante serve para controle de fluxo e confiabilidade, não para compartilhar uma conexão (D errada). O MSS é negociado na abertura com base no MTU local, mas o TCP não garante ausência de fragmentação em enlaces intermediários com MTU menor (E errada)."}, {"id": 20, "prova": "RC2021", "numero": 15, "conteudo": "Redes de computadores", "dificuldade": "Médio", "texto": "Para transferir pacotes entre nós de diferentes redes, os roteadores devem determinar o caminho ou rota que os pacotes devem seguir. Os algoritmos de roteamento do tipo \"estado do link\" (Link State) são centralizados, isto é, a topologia da rede bem como todos os custos dos links são conhecidos e disponíveis como entrada para o cálculo das rotas. O Open Shortest Path First (OSPF) é um protocolo deste tipo. Já os algoritmos do tipo \"vetor de distância\" (Distance Vector) são descentralizados, em que cada nó recebe informações de distância, medida em saltos, de seus vizinhos diretamente conectados. O Routing Information Protocol (RIP) é um protocolo deste tipo. (KUROSE, J. F.; ROSS, K. Redes de Computadores e a Internet. 5. ed. São Paulo: Pearson, 2010, adaptado.)", "comando": "Sobre os algoritmos de roteamento OSPF e RIP, assinale a opção correta.", "itens": [], "pergunta": "", "alternativas": ["O uso do protocolo de roteamento do tipo Link State, como o OSPF, exige um conhecimento prévio das redes envolvidas.", "O protocolo OSPF suporta mais de um tipo de métrica, como por exemplo, contagem de saltos, atraso da rede e custo do link.", "O protocolo RIP utiliza a contagem de saltos e a largura de banda como métricas para decidir o melhor caminho para uma rede remota.", "A distribuição periódica de toda a tabela de roteamento do OSPF consome uma grande quantidade de banda, sendo um problema em grandes redes.", "O limite de 15 hops (saltos) é característica de protocolos do tipo Link State como OSPF, assim uma rede com dimensão maior do que 15 hops é considerada inalcançável."], "gabarito": "B", "explicacao": "No OSPF o custo de cada enlace é configurável e pode refletir largura de banda, atraso ou outra política do administrador — ou seja, suporta métricas variadas (B correta). O OSPF descobre a topologia dinamicamente trocando LSAs, sem conhecimento prévio (A errada). O RIP usa apenas contagem de saltos (C errada) e é ele — não o OSPF — que envia periodicamente toda a tabela de roteamento (D errada) e tem o limite de 15 saltos, sendo 16 considerado inalcançável (E errada)."}, {"id": 21, "prova": "RC2021", "numero": 18, "conteudo": "Redes de computadores", "dificuldade": "Médio", "texto": "O padrão IEEE 802.11 com CSMA/CA (Carrier Sense Multiple Access with Collision Avoidance) guarda muita semelhança com o padrão IEEE 802.3, que utiliza CSMA/CD (Carrier Sense Multiple Access with Collision Detection). Contudo, tal abordagem possui um problema conhecido como estação escondida. Este problema ocorre quando uma estação A quer enviar para B, mas não pode ouvir que C também está enviando para B, tendo em vista que A e C estão fora do alcance uma da outra. (FOROUZAN, B. A. Comunicação de Dados e Redes de Computadores. 4. ed. São Paulo: McGraw-Hill, 2008, adaptado.)", "comando": "Considerando o problema das estações escondidas (A e C) e o mecanismo utilizado pelo CSMA/CA para evitar colisões, assinale a opção correta.", "itens": [], "pergunta": "", "alternativas": ["A estação A envia para a estação B um segmento TCP (Transmission Control Protocol) para estabelecimento de conexão com a flag syn ativada antes de enviar dados.", "A estação A marca o campo CoS (Classe de Serviço) da camada 2 com prioridade maior do que a estação C, obrigando a Estação B a aceitar os pacotes vindos da Estação A.", "A estação A, após detectar que a estação B está ocupada, espera um período de acordo com o algoritmo de backoff (ou tempo de espera) do CSMA/CD e, após esse período de tempo, torna a transmitir para a estação B.", "A estação A, antes de enviar um pacote para B, deve enviar quadros de controle denominados RTS (Request to Send) para B, que por sua vez, caso esteja livre, envia um quadro de controle CTS (Clear to Send) para A.", "A estação A emite quadros denominados signal jam (sinal de congestionamento), indicando a ocorrência de colisão e obrigando todos os nós a escutarem a rede enquanto ela envia o dado."], "gabarito": "D", "explicacao": "O mecanismo RTS/CTS do 802.11 resolve o problema da estação escondida: A envia um RTS a B; B responde com um CTS, que é ouvido por todas as estações no alcance de B (inclusive C), reservando o meio pelo tempo necessário. TCP (A) e CoS (B) atuam em outras camadas e não evitam colisões no meio sem fio. O algoritmo de backoff e o jam signal (C e E) pertencem ao CSMA/CD da Ethernet cabeada, onde a colisão pode ser detectada — o que não é possível em redes sem fio."}, {"id": 22, "prova": "RC2021", "numero": 21, "conteudo": "Computação em nuvem", "dificuldade": "Médio", "texto": "Contêineres e VMs (virtual machines, ou máquinas virtuais) são simplesmente maneiras diferentes de criar e usar recursos de computação — geralmente processadores, memória e dispositivos de entrada e saída — que já estão presentes em um computador físico. Embora o objetivo da virtualização por meio de máquinas virtuais seja essencialmente o mesmo que os contêineres, o resultado são duas abordagens notavelmente diferentes que oferecem algumas características e vantagens exclusivas para cargas de trabalho corporativas. (BIGELOW, S. J. Containers vs. VMs: What is the difference? TechTarget, 2020, adaptado.)", "comando": "A respeito das características das duas abordagens citadas no texto, avalie as afirmações a seguir.", "itens": ["Os contêineres podem empacotar o código de uma aplicação e todas as suas dependências, o que possibilita maior granularidade, escalabilidade e portabilidade do que as máquinas virtuais.", "Os contêineres compartilham o kernel do sistema operacional com outros processos, mas não podem ser limitados quanto ao uso de recursos, tais como CPU, RAM ou dispositivos de entrada/saída.", "Os contêineres são vantajosos por oferecerem um grau mais alto de isolamento e segurança do que as máquinas virtuais, devido ao fato de que os primeiros executam no mesmo kernel do sistema operacional."], "pergunta": "É correto o que se afirma em", "alternativas": ["I, apenas.", "II, apenas.", "I e III, apenas.", "II e III, apenas.", "I, II e III."], "gabarito": "A", "explicacao": "Contêineres (Docker, por exemplo) empacotam a aplicação com suas dependências em imagens leves, que iniciam em segundos e são facilmente replicadas — maior granularidade, escalabilidade e portabilidade (I correta). Eles compartilham o kernel do hospedeiro, mas recursos de CPU, memória e I/O podem, sim, ser limitados por mecanismos como cgroups (II errada). Justamente por compartilharem o kernel, o isolamento dos contêineres é menor que o das VMs, que possuem kernel próprio sobre o hipervisor (III errada)."}, {"id": 23, "prova": "RC2021", "numero": 22, "conteudo": "Redes de computadores", "dificuldade": "Fácil", "texto": "Em uma arquitetura cliente-servidor, para que uma aplicação ou serviço seja acessado, é necessário que uma comunicação seja estabelecida entre aquele que necessita (cliente) e aquele que disponibiliza o recurso (servidor).", "comando": "Considerando o texto apresentado, avalie as asserções a seguir e a relação proposta entre elas.", "itens": ["Quando um programador desenvolve uma aplicação ou serviço de rede, é necessário utilizar um socket para unir o endereço IP da interface de rede com uma porta específica.", "PORQUE", "O socket possibilita ao sistema operacional identificar qual porta a aplicação está respondendo, permitindo que o fluxo de dados seja entregue corretamente."], "pergunta": "A respeito dessas asserções, assinale a opção correta.", "alternativas": ["As asserções I e II são proposições verdadeiras, e a II é uma justificativa correta da I.", "As asserções I e II são proposições verdadeiras, mas a II não é uma justificativa correta da I.", "A asserção I é uma proposição verdadeira, e a II é uma proposição falsa.", "A asserção I é uma proposição falsa, e a II é uma proposição verdadeira.", "As asserções I e II são proposições falsas."], "gabarito": "A", "explicacao": "Um socket é a interface entre a aplicação e a pilha TCP/IP do sistema operacional: ele associa (bind) um endereço IP a um número de porta (I verdadeira). É exatamente por essa associação que o SO sabe para qual processo entregar os segmentos que chegam a determinada porta — a multiplexação/demultiplexação da camada de transporte (II verdadeira). Como a II explica a razão de ser do socket descrito em I, ela é a justificativa correta."}, {"id": 24, "prova": "RC2021", "numero": 24, "conteudo": "Segurança da informação", "dificuldade": "Difícil", "texto": "Uma empresa acrescentou, em seu documento intitulado Políticas de Segurança da Informação, uma seção dedicada às políticas de segurança em redes sem fio 802.11. Nesse documento, foram definidos, entre outros, os requisitos a seguir.\n1) Todos os usuários da rede sem fio deverão ser autenticados de forma segura e centralizada para obter acesso à rede.\n2) Todas as conexões à rede sem fio deverão utilizar protocolo de criptografia com chave mínima de 256 bits.\n3) Todas as conexões à rede sem fio deverão utilizar protocolos de autenticação mútua segura entre a estação e a rede.", "comando": "Considerando os requisitos 1, 2 e 3, estabelecidos por essa empresa, avalie as afirmações a seguir.", "itens": ["Adquirir e habilitar um WIPS (Wireless Intrusion Prevention System, Sistema de Prevenção de Intrusão Sem Fio) é suficiente para a empresa atender o requisito 3.", "Criar uma segunda identificação de rede (SSID), exclusiva para os dispositivos de uso particular, separada da rede da empresa com firewall, é suficiente para que o requisito 1 seja atendido.", "Instalar um servidor RADIUS com o protocolo 802.11i, usando o protocolo EAP-FAST, PEAP ou EAP-TLS como protocolo de autenticação, é suficiente para atender os requisitos 1 e 3.", "Configurar, nos pontos de acesso, o protocolo de segurança WPA2-Enterprise com criptografia AES, é suficiente para que o requisito 2 seja atendido."], "pergunta": "É correto apenas o que se afirma em", "alternativas": ["I e II.", "I e III.", "III e IV.", "I, II e IV.", "II, III e IV."], "gabarito": "C", "explicacao": "Um WIPS detecta e bloqueia pontos de acesso e clientes não autorizados, mas não implementa autenticação mútua entre estação e rede (I errada). Separar visitantes em outro SSID é segmentação, não autenticação centralizada (II errada). Um servidor RADIUS com 802.11i/802.1X e métodos EAP (EAP-TLS, PEAP, EAP-FAST) fornece autenticação centralizada e mútua — o cliente valida o servidor e vice-versa — atendendo aos requisitos 1 e 3 (III correta). WPA2-Enterprise com AES, conforme o gabarito oficial, atende ao requisito de criptografia forte da política (IV correta)."}, {"id": 25, "prova": "RC2021", "numero": 29, "conteudo": "Redes de computadores", "dificuldade": "Fácil", "texto": "Redes Definidas por Software (SDN) permitem que administradores de redes gerenciem os serviços da rede de uma maneira mais simples, com uma maior abstração da funcionalidade em baixo nível da rede; isso é feito através da virtualização, o que evita ter que configurar o hardware manualmente. Para fazer essa abstração, a SDN realiza uma separação em dois planos e requer um dispositivo controlador.", "comando": "Considerando as informações apresentadas, assinale a alternativa que descreve corretamente a denominação dos dois planos mencionados.", "itens": [], "pergunta": "", "alternativas": ["Dados e controle.", "Controle e fluxo.", "Fluxo e gerenciamento.", "Dados e gerenciamento.", "Gerenciamento e controle."], "gabarito": "A", "explicacao": "A ideia central da SDN é separar o plano de controle (que decide como o tráfego deve ser encaminhado — a 'inteligência' da rede, centralizada no controlador) do plano de dados (os switches, que apenas encaminham pacotes conforme as regras recebidas, por exemplo via OpenFlow). Essa separação permite programar a rede por software, sem configurar equipamento por equipamento."}, {"id": 26, "prova": "RC2021", "numero": 31, "conteudo": "Infraestrutura de TI", "dificuldade": "Médio", "texto": "Uma das métricas mais utilizadas para medir a eficiência energética em datacenters é denominada PUE (Power Usage Effectiveness), a qual define a eficiência energética como a razão entre o consumo total de energia de um datacenter (Edc) e o consumo dos equipamentos de TI (Eti), ou seja, PUE = Edc / Eti. Quanto mais eficiente é a infraestrutura elétrica, menor será esse valor. Valores de PUE próximos a 1,0 indicam alta eficiência energética, sendo que, para o Brasil, este valor está na faixa de 2,0, e dificilmente atingiria PUE abaixo de 1,3. Já em regiões mais frias durante o ano todo a PUE pode chegar até 1,1. (FACCIONI FILHO, M. Gestão da infraestrutura do datacenter. Palhoça: UnisulVirtual, 2016, adaptado.)", "comando": "Considerando que, atualmente, os equipamentos de TI suportam temperaturas ambientes bastante altas, assinale a opção correta.", "itens": [], "pergunta": "", "alternativas": ["Desde que dentro dos limites estabelecidos pelo fabricante, a temperatura de operação mais alta dos equipamentos de TI favorece a redução da PUE.", "Substituir a computação tradicional de um datacenter pela virtualização não favorece a redução dos valores de PUE.", "Limites superiores mais altos na operação dos equipamentos de TI resultam em maior uso de refrigeração.", "Valores de PUE abaixo de 1,0 são possíveis de serem alcançados com a utilização de fontes renováveis.", "Energia elétrica gerada por meio de fontes renováveis não são consideradas nos cálculos de PUE."], "gabarito": "A", "explicacao": "Se os equipamentos toleram temperaturas mais altas, o data center pode operar com menos refrigeração; como a refrigeração compõe o consumo total (Edc) mas não o consumo de TI (Eti), o PUE diminui (A correta; C errada). O PUE é sempre ≥ 1,0, pois o consumo total inclui o de TI — nenhuma fonte de energia muda isso (D errada), e a origem da energia (renovável ou não) não altera o cálculo, apenas a pegada de carbono (E errada). A virtualização reduz o número de servidores e, com isso, a demanda de energia e refrigeração, podendo melhorar a eficiência (B errada)."}, {"id": 27, "prova": "RC2021", "numero": 34, "conteudo": "Segurança da informação", "dificuldade": "Médio", "texto": "As empresas têm revisado suas políticas de segurança da informação de modo a adotar novas tecnologias que aumentem a segurança, principalmente em situações que envolvam reuniões por webconferência. Considerando este cenário, a tecnologia de redes virtuais privadas (VPN – Virtual Private Network) são bastante utilizadas para aumentar o nível de segurança dos dados que trafegam na rede pública.", "comando": "No que se refere a VPN, avalie as afirmações a seguir.", "itens": ["As VPNs criam túneis na rede pública que permitem conectar diferentes unidades organizacionais, compartilhar informações e conectar funcionários em atividades remotas às plataformas corporativas, oferecendo criptografia forte para fornecer segurança de dados e autenticação forte para limitar o acesso a aplicativos com base em políticas de segurança definidas.", "As soluções de implementação VPN atuam em diferentes camadas da arquitetura OSI, por exemplo, o Internet Protocol Security (IPSec) atua na camada de rede, enquanto o Secure Sockets Layer (SSL) atua na camada de aplicação.", "A VPN IPsec normalmente permite acesso remoto a todos os dispositivos e serviços oferecidos em uma rede e seu protocolo faz parte do conjunto TCP/IP, sendo implementado como um componente padrão dos sistemas operacionais que suportam o IPv6.", "Como na VPN IPSec, a VPN SSL também oferece acesso a todos os recursos da rede privada, sendo que sua principal diferença é a dependência do TLS, que é incorporado por padrão em navegadores da Web."], "pergunta": "É correto o que se afirma em", "alternativas": ["I, apenas.", "II e IV, apenas.", "III e IV, apenas.", "I, II e III, apenas.", "I, II, III e IV."], "gabarito": "D", "explicacao": "As afirmações I, II e III descrevem corretamente as VPNs: túneis criptografados com autenticação forte (I); IPsec operando na camada de rede e SSL/TLS nas camadas superiores (II); e IPsec como parte da pilha TCP/IP, originalmente obrigatório nas implementações de IPv6, dando acesso a toda a rede (III). A IV está errada: a VPN SSL normalmente dá acesso a aplicações e serviços específicos (acesso granular via navegador), e não a todos os recursos da rede, como faz a VPN IPsec."}]}</script>
+<script>
+const FORM_URL = ""; // opcional: link do Google Forms/Microsoft Forms de avaliação; vazio = botão oculto
+const DB = JSON.parse(document.getElementById('data').textContent);
+const Q = DB.questoes, P = DB.provas;
+const $ = s => document.querySelector(s);
+const views = {intro:$('#viewIntro'),quiz:$('#viewQuiz'),result:$('#viewResult'),fontes:$('#viewFontes'),painel:$('#viewPainel')};
+function show(v){ for(const k in views) views[k].hidden = (k!==v); window.scrollTo({top:0}); }
+const ROMAN = ['I','II','III','IV','V','VI'];
+const LET = ['A','B','C','D','E'];
+const DIFCLASS = {'Fácil':'d1','Médio':'d2','Difícil':'d3'};
+let session = {list:[], i:0, answers:{}, skipped:{}, mode:'estudo', t0:0};
+let mode = 'estudo';
+const store = {get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+
+/* ---------- tema ---------- */
+const ICONS={auto:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>',light:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',dark:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>'};
+const THEMES=['auto','light','dark'], TLABEL={auto:'Auto',light:'Claro',dark:'Escuro'};
+let theme = store.get('g4theme')||'auto';
+function applyTheme(){ const r=document.documentElement; if(theme==='auto') r.removeAttribute('data-theme'); else r.setAttribute('data-theme',theme); $('#themeIcon').innerHTML=ICONS[theme]; $('#themeLabel').textContent=TLABEL[theme]; }
+$('#themeBtn').onclick=()=>{ theme=THEMES[(THEMES.indexOf(theme)+1)%3]; store.set('g4theme',theme); applyTheme(); toast(`Tema: ${TLABEL[theme]}`); };
+applyTheme();
+
+/* ---------- brilho do cursor ---------- */
+(function(){ const g=$('#glow'); let x=0,y=0,tx=0,ty=0,raf=null,shown=false;
+  function tick(){ x+=(tx-x)*.18; y+=(ty-y)*.18; g.style.transform=`translate(${x-180}px,${y-180}px)`; if(Math.abs(tx-x)>.5||Math.abs(ty-y)>.5) raf=requestAnimationFrame(tick); else raf=null; }
+  document.addEventListener('pointermove',e=>{ if(e.pointerType==='touch') return; tx=e.clientX; ty=e.clientY; if(!shown){shown=true;g.style.opacity='1';} if(!raf) raf=requestAnimationFrame(tick); });
+  document.addEventListener('pointerleave',()=>{g.style.opacity='0';shown=false});
+})();
+
+/* ---------- dados da tela inicial ---------- */
+const byAll={}; Q.forEach(q=>byAll[q.conteudo]=(byAll[q.conteudo]||0)+1);
+$('#chips').innerHTML = DB.conteudos.map(c=>`<span class="chip">${c} · ${byAll[c]||0}</span>`).join('');
+DB.conteudos.forEach(c=>{const o=document.createElement('option');o.textContent=c;$('#fConteudo').append(o)});
+Object.entries(P).forEach(([k,v])=>{const o=document.createElement('option');o.value=k;o.textContent=v.nome;$('#fProva').append(o)});
+$('#nome').value = store.get('g4nome')||'';
+$('#nome').addEventListener('input',()=>{ $('#nome').classList.remove('err'); $('#nomeHelp').classList.remove('err'); $('#nomeHelp').textContent='Pode ser só o primeiro nome ou as iniciais.'; });
+function filtered(){
+  const c=$('#fConteudo').value, d=$('#fDif').value, p=$('#fProva').value;
+  return Q.filter(q=>(!c||q.conteudo===c)&&(!d||q.dificuldade===d)&&(!p||q.prova===p));
+}
+function renderIntroStats(){
+  const f=filtered();
+  const byC={}; f.forEach(q=>byC[q.conteudo]=(byC[q.conteudo]||0)+1);
+  const min=Math.max(1,Math.round(f.length*1.5));
+  $('#statsIntro').innerHTML = f.length ? `<span class="mono">${f.length} ${f.length===1?'questão':'questões'} · ${Object.keys(byC).length} ${Object.keys(byC).length===1?'conteúdo':'conteúdos'} · ${new Set(f.map(q=>q.prova)).size} ${new Set(f.map(q=>q.prova)).size===1?'prova':'provas'} · uns ${min} min</span>` : '<span class="mono">Nenhuma questão com esses filtros.</span>';
+  $('#btnStart').disabled = f.length===0;
+  $('#btnStart').textContent = mode==='estudo'?'Começar':'Iniciar simulado';
+}
+['#fConteudo','#fDif','#fProva'].forEach(s=>$(s).addEventListener('change',renderIntroStats));
+$('#modeEstudo').onclick=()=>{mode='estudo';$('#modeEstudo').classList.add('on');$('#modeSimulado').classList.remove('on');renderIntroStats()};
+$('#modeSimulado').onclick=()=>{mode='simulado';$('#modeSimulado').classList.add('on');$('#modeEstudo').classList.remove('on');renderIntroStats()};
+if(store.get('g4mode')==='simulado') $('#modeSimulado').click();
+renderIntroStats();
+if(FORM_URL){ $('#btnForm').href=FORM_URL; $('#btnForm').hidden=false; }
+
+function loadHist(){ try{ return JSON.parse(store.get('g4hist')||'[]'); }catch(e){ return []; } }
+function saveHist(h){ store.set('g4hist',JSON.stringify(h.slice(-20))); }
+function renderHist(){
+  const h=loadHist(); if(!h.length){ $('#hist').textContent='Primeira vez por aqui? O histórico das suas tentativas fica neste navegador.'; return; }
+  const last=h[h.length-1]; const best=Math.max(...h.map(x=>x.pct));
+  $('#hist').textContent=`Tentativas neste navegador: ${h.length}. Última: ${last.acertos}/${last.total} (${last.pct}%). Melhor: ${best}%.`;
+}
+renderHist();
+
+/* ---------- banco de dados da turma (quando disponível) ---------- */
+let db=null, uid=null, dbReady=false;
+(async()=>{ try{
+  if(!window.claude || typeof window.claude.use!=='function') return;
+  const [u,d]=await Promise.all([window.claude.use('user'),window.claude.use('db')]);
+  if(!d) return; db=d; uid=u?await u.id():null; dbReady=true;
+  $('#btnPainel').hidden=false;
+}catch(e){ db=null; } })();
+async function saveResult(rec){
+  if(!db||!uid) return 'local';
+  const ref=db.doc('resultados/'+uid);
+  let prev={}; try{ const s=await ref.get(); if(s.exists) prev=s.data()||{}; }catch(e){}
+  const tentativas=Array.isArray(prev.tentativas)?prev.tentativas.slice(-9):[];
+  tentativas.push(rec);
+  const melhor=Math.max(rec.pct,...tentativas.map(t=>t.pct||0));
+  await ref.set({nome:rec.nome, melhor, tentativas, total:tentativas.length, ultima:rec.quando, conteudos:rec.conteudos});
+  return 'db';
+}
+async function renderPainel(){
+  const body=$('#painelBody'); body.innerHTML='<p class="muted" style="padding:12px">Carregando…</p>'; show('painel');
+  if(!db){ body.innerHTML='<p class="muted" style="padding:12px">O painel não está disponível nesta forma de acesso. Peça ao grupo o resumo pelo WhatsApp.</p>'; return; }
+  try{
+    const snap=await db.collection('resultados').orderBy('melhor','desc').limit(200).get();
+    if(snap.empty){ body.innerHTML='<p class="muted" style="padding:12px">Ninguém salvou resultado ainda. Faça o quiz com o nome preenchido para aparecer aqui.</p>'; painelRows=[]; return; }
+    painelRows=snap.docs.map(d=>d.data());
+    body.innerHTML=`<table><thead><tr><th>#</th><th>Nome</th><th class="n">Melhor</th><th class="n">Tentativas</th><th>Última</th></tr></thead><tbody>${painelRows.map((r,i)=>`<tr style="animation-delay:${i*40}ms"><td class="n">${i+1}</td><td></td><td class="n">${Math.round(r.melhor||0)}%</td><td class="n">${r.total||1}</td><td class="muted">${r.ultima?new Date(r.ultima).toLocaleDateString('pt-BR'):'—'}</td></tr>`).join('')}</tbody></table>`;
+    body.querySelectorAll('tbody tr').forEach((tr,i)=>tr.children[1].textContent=painelRows[i].nome||'Sem nome');
+  }catch(e){ body.innerHTML='<p class="muted" style="padding:12px">Não foi possível carregar o painel agora. Tente novamente em instantes.</p>'; }
+}
+let painelRows=[];
+$('#btnPainel').onclick=renderPainel;
+$('#btnBackIntro2').onclick=()=>show('intro');
+$('#btnPainelCsv').onclick=()=>copyText('nome;melhor_pct;tentativas;ultima\n'+painelRows.map(r=>`${(r.nome||'').replace(/;/g,',')};${Math.round(r.melhor||0)};${r.total||1};${r.ultima||''}`).join('\n'),'Tabela copiada em formato CSV.');
+
+/* ---------- fluxo do quiz ---------- */
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function nomeOk(){
+  const n=$('#nome').value.trim();
+  if(n.length<2){ $('#nome').classList.add('err'); $('#nomeHelp').classList.add('err'); $('#nomeHelp').textContent='Falta o nome. Duas letras já servem.'; $('#nome').focus(); return false; }
+  store.set('g4nome',n); return true;
+}
+function start(list){
+  if(!nomeOk()) return;
+  if($('#fOrdem').value==='aleatoria') list=shuffle(list.slice()); else list=list.slice().sort((a,b)=>a.prova.localeCompare(b.prova)||a.numero-b.numero);
+  store.set('g4mode',mode);
+  session={list,i:0,answers:{},skipped:{},mode,t0:Date.now()}; show('quiz'); renderQ();
+}
+$('#btnStart').onclick=()=>start(filtered());
+$('#btnFontes').onclick=()=>{renderFontes();show('fontes')};
+$('#btnBackIntro').onclick=()=>show('intro');
+$('#btnAgain').onclick=()=>{renderIntroStats();renderHist();show('intro')};
+$('#btnReview').onclick=()=>{const w=session.list.filter(q=>!session.answers[q.id]||session.answers[q.id]!==q.gabarito); if(w.length) start(w); else {renderIntroStats();show('intro')}};
+$('#btnQuit').onclick=()=>finish();
+$('#btnSkip').onclick=()=>{ const q=session.list[session.i]; if(!session.answers[q.id]) session.skipped[q.id]=true; next(); };
+$('#btnNext').onclick=()=>next();
+function next(){
+  const w=$('#qwrap'); w.classList.add('out');
+  setTimeout(()=>{ w.classList.remove('out'); session.i++; if(session.i>=session.list.length) finish(); else renderQ(); },170);
+}
+document.addEventListener('keydown',ev=>{
+  if(views.quiz.hidden) return;
+  if(['SELECT','INPUT','TEXTAREA'].includes(ev.target.tagName)) return;
+  const k=ev.key.toUpperCase();
+  const idx = LET.indexOf(k)>=0 ? LET.indexOf(k) : (/^[1-5]$/.test(k)? +k-1 : -1);
+  if(idx>=0){ const b=document.querySelector(`.opt[data-l="${LET[idx]}"]`); if(b&&!b.disabled){ b.click(); ev.preventDefault(); } }
+  else if((ev.key==='Enter'||ev.key==='ArrowRight') && !$('#btnNext').disabled){ $('#btnNext').click(); ev.preventDefault(); }
+});
+function updateTop(){
+  const n=session.list.length, done=Object.keys(session.answers).length+Object.keys(session.skipped).length;
+  const ok=session.list.filter(q=>session.answers[q.id]===q.gabarito).length;
+  const pct=n?Math.round(100*done/n):0;
+  $('#pwrap').setAttribute('aria-valuenow',pct);
+  const leds=$('#pwrap'); if(leds.children.length!==n){ leds.innerHTML=session.list.map(()=>'<i></i>').join(''); }
+  session.list.forEach((q,i)=>{ const el=leds.children[i]; const a=session.answers[q.id]; el.className = a ? (session.mode==='estudo' ? (a===q.gabarito?'ok':'bad') : 'ans') : (session.skipped[q.id]?'skip':(i===session.i?'cur':'')); });
+  const s=$('#scoreTop'); const txt = session.mode==='estudo' ? `${ok} certas · ${Math.min(session.i+1,n)}/${n}` : `${done} respondidas · ${Math.min(session.i+1,n)}/${n}`;
+  if(s.textContent!==txt){ s.textContent=txt; s.classList.remove('bump'); void s.offsetWidth; s.classList.add('bump'); }
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function itensHTML(q){
+  if(!q.itens.length) return '';
+  let r=0; return '<ol class="itens">'+q.itens.map(it=> it==='PORQUE'?'<li class="porque">PORQUE</li>':`<li><span class="rn">${ROMAN[r++]}.</span><span>${esc(it)}</span></li>`).join('')+'</ol>';
+}
+function renderQ(){
+  const q=session.list[session.i]; const pv=P[q.prova];
+  const wrap=$('#qwrap'); wrap.classList.remove('qwrap'); void wrap.offsetWidth; wrap.classList.add('qwrap');
+  $('#qcard').innerHTML=`
+    <div class="qhead">
+      <div class="qmeta"><span class="tag">${esc(q.conteudo)}</span><span class="tag src">${esc(pv.sigla)} · Q${q.numero}</span><span class="tag ${DIFCLASS[q.dificuldade]}">${esc(q.dificuldade)}</span></div>
+      <span class="qcount">Questão ${session.i+1} de ${session.list.length}</span>
+    </div>
+    <p class="qtext">${esc(q.texto)}<span class="comando">${esc(q.comando)}</span></p>
+    ${itensHTML(q)}
+    ${q.pergunta?`<p class="pergunta">${esc(q.pergunta)}</p>`:''}
+    <ul class="opts" id="opts" role="group" aria-label="Alternativas">${q.alternativas.map((a,i)=>`<li><button class="opt" data-l="${LET[i]}" id="opt-${q.id}-${LET[i]}"><span class="l">${LET[i]}</span><span>${esc(a)}</span></button></li>`).join('')}</ul>
+    <div id="fb" aria-live="polite"></div>`;
+  $('#btnNext').disabled=true; $('#btnSkip').hidden=false;
+  $('#btnNext').textContent = session.i===session.list.length-1 ? 'Ver resultado' : 'Próxima →';
+  document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>answer(q,b.dataset.l));
+  updateTop();
+}
+function answer(q,l){
+  session.answers[q.id]=l; delete session.skipped[q.id];
+  $('#btnSkip').hidden=true;
+  if(session.mode==='simulado'){
+    document.querySelectorAll('.opt').forEach(b=>{ const on=b.dataset.l===l; if(on){b.classList.remove('sel');void b.offsetWidth;} b.classList.toggle('sel',on); });
+    $('#btnNext').disabled=false; updateTop(); return;
+  }
+  document.querySelectorAll('.opt').forEach(b=>{
+    b.disabled=true;
+    if(b.dataset.l===q.gabarito) b.classList.add('right');
+    else if(b.dataset.l===l) b.classList.add('wrong');
+    else b.classList.add('dim');
+  });
+  const ok=l===q.gabarito; const pv=P[q.prova];
+  $('#fb').innerHTML=`<div class="feedback ${ok?'ok':'bad'}">
+    <span class="verdict">${ok?'Certo.':'Errou.'} Gabarito: ${q.gabarito}.</span>
+    <p>${esc(q.explicacao)}</p>
+    <p class="fonte">Fonte: ${esc(pv.nome)}, questão ${q.numero}. Inep/MEC. <a href="${pv.prova}" target="_blank" rel="noopener">prova</a> · <a href="${pv.gabarito}" target="_blank" rel="noopener">gabarito oficial</a></p>
+  </div>`;
+  $('#btnNext').disabled=false; updateTop();
+  $('#btnNext').focus({preventScroll:true});
+  setTimeout(()=>$('#fb').scrollIntoView({behavior:'smooth',block:'nearest'}),60);
+}
+function fmtTime(ms){const s=Math.round(ms/1000);const m=Math.floor(s/60);return m?`${m} min ${String(s%60).padStart(2,'0')} s`:`${s} s`}
+let lastSummary='';
+async function finish(){
+  const nome=$('#nome').value.trim();
+  const answered=session.list.filter(q=>session.answers[q.id]);
+  const skipped=session.list.filter(q=>!session.answers[q.id]);
+  const ok=answered.filter(q=>session.answers[q.id]===q.gabarito).length;
+  const total=answered.length; const pct=total?Math.round(100*ok/total):0;
+  const elapsed=Date.now()-session.t0;
+  if(total){ const h=loadHist(); h.push({t:Date.now(),acertos:ok,total,pct}); saveHist(h); }
+  const byC0={}; answered.forEach(q=>{byC0[q.conteudo]=byC0[q.conteudo]||{ok:0,n:0}; byC0[q.conteudo].n++; if(session.answers[q.id]===q.gabarito) byC0[q.conteudo].ok++;});
+  const weakest=Object.entries(byC0).filter(([,v])=>v.ok<v.n).sort((a,b)=>a[1].ok/a[1].n-b[1].ok/b[1].n)[0];
+  $('#resTitle').textContent = !total ? 'Nenhuma questão respondida.' : (ok===total ? `${nome}, ${total} de ${total}. Nada a revisar.` : weakest ? `${nome}, ${ok} de ${total}. O que mais pesou: ${weakest[0]} (${weakest[1].ok} de ${weakest[1].n}).` : `${nome}, ${ok} de ${total}.`);
+  const r=52, c=2*Math.PI*r;
+  $('#ring').innerHTML=`<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="${r}" fill="none" stroke="var(--line)" stroke-width="12"/><circle class="v" cx="60" cy="60" r="${r}" fill="none" stroke="var(--accent)" stroke-width="12" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c}" transform="rotate(-90 60 60)"/><text x="60" y="66" text-anchor="middle" font-family="Archivo,system-ui" font-weight="800" font-size="24" fill="var(--fg)">${pct}%</text></svg>
+    <div><div class="big">${ok} de ${total}</div><p class="muted" style="margin-top:6px">${session.mode==='estudo'?'Modo estudo':'Modo simulado'} · ${fmtTime(elapsed)}${skipped.length?` · ${skipped.length} sem resposta`:''}</p></div>`;
+  $('#statsRes').innerHTML=`<div class="stat"><b>${ok}</b><span>acertos</span></div><div class="stat"><b>${total-ok}</b><span>erros</span></div><div class="stat"><b>${skipped.length}</b><span>sem resposta</span></div><div class="stat"><b>${total?fmtTime(elapsed/total):'—'}</b><span>por questão</span></div>`;
+  const byC={}; answered.forEach(q=>{byC[q.conteudo]=byC[q.conteudo]||{ok:0,n:0}; byC[q.conteudo].n++; if(session.answers[q.id]===q.gabarito) byC[q.conteudo].ok++;});
+  $('#bars').innerHTML='<h3>Desempenho por conteúdo</h3>'+(Object.entries(byC).sort((a,b)=>a[1].ok/a[1].n-b[1].ok/b[1].n).map(([c2,v],i)=>`<div class="bar"><div><div>${esc(c2)}</div><div class="track"><i style="width:${100*v.ok/v.n}%;animation-delay:${i*80}ms"></i></div></div><span class="n">${v.ok}/${v.n} · ${Math.round(100*v.ok/v.n)}%</span></div>`).join('')||'<p class="muted">Responda ao menos uma questão para ver o desempenho por conteúdo.</p>');
+  $('#revisao').innerHTML=session.list.map(q=>{
+    const a=session.answers[q.id]; const st=!a?'skip':(a===q.gabarito?'ok':'bad'); const pv=P[q.prova];
+    const alts=q.alternativas.map((t,i)=>`<li class="${LET[i]===q.gabarito?'right':(LET[i]===a?'wrong':'')}" style="display:grid;grid-template-columns:24px 1fr;gap:6px"><span class="mono">${LET[i]})</span><span>${esc(t)}</span></li>`).join('');
+    return `<details class="rev ${st}"><summary><span class="k">${st==='ok'?'✓':st==='bad'?'✗':'–'}</span><span>${esc(pv.sigla)} · Q${q.numero} · ${esc(q.conteudo)}</span><span class="g">${st==='ok'?'acertou':st==='bad'?`marcou ${a} · gabarito ${q.gabarito}`:'não respondida · gabarito '+q.gabarito}</span></summary>
+      <div class="body"><div class="q">${esc(q.texto)}\n${esc(q.comando)}</div>${itensHTML(q)}<ul style="list-style:none;padding:0;margin:0;display:grid;gap:4px;font-size:14px">${alts}</ul><div class="feedback ${st==='ok'?'ok':'bad'}"><span class="verdict">Gabarito: ${q.gabarito}</span><p>${esc(q.explicacao)}</p><p class="fonte">Fonte: ${esc(pv.nome)}, questão ${q.numero}. <a href="${pv.prova}" target="_blank" rel="noopener">prova</a> · <a href="${pv.gabarito}" target="_blank" rel="noopener">gabarito</a></p></div></div></details>`}).join('');
+  $('#btnReview').disabled = !session.list.some(q=>session.answers[q.id]!==q.gabarito);
+  const conteudos={}; Object.entries(byC).forEach(([k,v])=>conteudos[k]={ok:v.ok,n:v.n});
+  lastSummary=`Quiz Infra, Redes & Segurança (Enade) — ${nome}: ${ok}/${total} acertos (${pct}%) em ${fmtTime(elapsed)}, modo ${session.mode}.\n`+Object.entries(byC).map(([c2,v])=>`• ${c2}: ${v.ok}/${v.n}`).join('\n');
+  $('#btnWa').href='https://wa.me/?text='+encodeURIComponent(lastSummary);
+  show('result');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ const v=document.querySelector('#ring circle.v'); if(v) v.style.strokeDashoffset=String(c*(1-pct/100)); }));
+  // salvar no painel da turma
+  const st=$('#saveStatus'); st.className='save'; st.innerHTML='';
+  if(!total) return;
+  st.innerHTML='<span class="dot"></span><span>Salvando no painel da turma…</span>';
+  const rec={nome,acertos:ok,total,pct,modo:session.mode,segundos:Math.round(elapsed/1000),quando:new Date().toISOString(),conteudos};
+  try{
+    const where=await saveResult(rec);
+    if(where==='db'){ st.className='save ok'; st.innerHTML='<span class="dot"></span><span>Resultado salvo no painel da turma.</span>'; }
+    else { st.className='save'; st.innerHTML='<span class="dot"></span><span>Resultado guardado neste navegador. Envie o resumo pelo WhatsApp para registrar na turma.</span>'; }
+  }catch(e){ st.className='save bad'; st.innerHTML='<span class="dot"></span><span>Não foi possível salvar no painel (acesso sem permissão de gravação). Envie o resumo pelo WhatsApp ou copie o texto.</span>'; }
+}
+async function copyText(t,msg){
+  try{ await navigator.clipboard.writeText(t); toast(msg); }
+  catch(e){ const ta=document.createElement('textarea'); ta.value=t; document.body.append(ta); ta.select(); try{document.execCommand('copy'); toast(msg);}catch(_){toast('Não foi possível copiar. Selecione o texto manualmente.');} ta.remove(); }
+}
+$('#btnCopy').onclick=()=>copyText(lastSummary,'Resumo copiado.');
+function toast(m){ const t=document.createElement('div'); t.className='toast'; t.textContent=m; document.body.append(t); setTimeout(()=>t.remove(),2200); }
+function renderFontes(){
+  $('#fontesList').innerHTML=Object.entries(P).map(([k,v])=>{const qs=Q.filter(q=>q.prova===k).map(q=>q.numero).sort((a,b)=>a-b);return `<li class="card"><strong>${esc(v.nome)}</strong><span class="mono muted">Questões utilizadas: ${qs.join(', ')} (${qs.length})</span><a href="${v.prova}" target="_blank" rel="noopener">Prova (Inep)</a><a href="${v.gabarito}" target="_blank" rel="noopener">Gabarito definitivo (Inep)</a></li>`}).join('');
+}
+</script>
+</body></html>
