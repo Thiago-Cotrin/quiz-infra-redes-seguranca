@@ -253,7 +253,7 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-si
     </div>
     <div class="filters">
       <label>Conteúdo <select id="fConteudo"><option value="">Todos</option></select></label>
-      <label>Dificuldade <select id="fDif"><option value="">Todas</option><option>Fácil</option><option>Médio</option><option>Difícil</option></select></label>
+      <label>Dificuldade <select id="fDif"><option value="">Todas</option><option value="Fácil">Fácil</option><option value="Médio">Médio</option><option value="Difícil">Difícil</option></select></label>
       <label>Prova <select id="fProva"><option value="">Todas</option></select></label>
       <label>Ordem <select id="fOrdem"><option value="aleatoria">Aleatória</option><option value="original">Por prova e número</option></select></label>
     </div>
@@ -294,7 +294,7 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-si
   </div>
   <div class="actions">
     <button class="btn" id="btnAgain">Novo simulado</button>
-    <button class="btn ghost" id="btnReview">Refazer só as que errei</button>
+    <button class="btn ghost" id="btnReview">Refazer as que errei ou pulei</button>
     <button class="btn subtle" id="btnCopy">Copiar resumo</button>
     <a class="btn subtle" id="btnWa" target="_blank" rel="noopener">Enviar no WhatsApp</a>
     <a class="btn subtle" id="btnForm" target="_blank" rel="noopener" hidden>Avaliar o quiz (formulário)</a>
@@ -366,7 +366,7 @@ applyTheme();
 /* ---------- dados da tela inicial ---------- */
 const byAll={}; Q.forEach(q=>byAll[q.conteudo]=(byAll[q.conteudo]||0)+1);
 $('#chips').innerHTML = DB.conteudos.map(c=>`<span class="chip">${c} · ${byAll[c]||0}</span>`).join('');
-DB.conteudos.forEach(c=>{const o=document.createElement('option');o.textContent=c;$('#fConteudo').append(o)});
+DB.conteudos.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;$('#fConteudo').append(o)});
 Object.entries(P).forEach(([k,v])=>{const o=document.createElement('option');o.value=k;o.textContent=v.nome;$('#fProva').append(o)});
 $('#nome').value = store.get('g4nome')||'';
 $('#nome').addEventListener('input',()=>{ $('#nome').classList.remove('err'); $('#nomeHelp').classList.remove('err'); $('#nomeHelp').textContent='Pode ser só o primeiro nome ou as iniciais.'; });
@@ -374,7 +374,14 @@ function filtered(){
   const c=$('#fConteudo').value, d=$('#fDif').value, p=$('#fProva').value, m=$('#fMarc').checked;
   return Q.filter(q=>(!c||q.conteudo===c)&&(!d||q.dificuldade===d)&&(!p||q.prova===p)&&(!m||marcadas.has(q.id)));
 }
+function refreshOptions(){
+  const c=$('#fConteudo').value, d=$('#fDif').value, p=$('#fProva').value, m=$('#fMarc').checked;
+  const base=(sel)=>Q.filter(q=>(sel!=='c'?(!c||q.conteudo===c):true)&&(sel!=='d'?(!d||q.dificuldade===d):true)&&(sel!=='p'?(!p||q.prova===p):true)&&(!m||marcadas.has(q.id)));
+  const fill=(id,key,sel)=>{ const el=$(id); const b=base(sel); [...el.options].forEach(o=>{ if(!o.dataset.label){ o.dataset.label=o.textContent; } if(!o.value) return; const n=b.filter(q=>q[key]===o.value).length; o.textContent=o.dataset.label+` (${n})`; o.disabled=n===0&&el.value!==o.value; }); };
+  fill('#fConteudo','conteudo','c'); fill('#fDif','dificuldade','d'); fill('#fProva','prova','p');
+}
 function renderIntroStats(){
+  refreshOptions();
   const f=filtered();
   const byC={}; f.forEach(q=>byC[q.conteudo]=(byC[q.conteudo]||0)+1);
   const min=Math.max(1,Math.round(f.length*1.5));
@@ -395,7 +402,9 @@ function saveHist(h){ store.set('g4hist',JSON.stringify(h.slice(-20))); }
 function renderHist(){
   const h=loadHist(); if(!h.length){ $('#hist').textContent='Primeira vez por aqui? O histórico das suas tentativas fica neste navegador.'; return; }
   const last=h[h.length-1]; const best=Math.max(...h.map(x=>x.pct));
-  $('#hist').textContent=`Tentativas neste navegador: ${h.length}. Última: ${last.acertos}/${last.total} (${last.pct}%). Melhor: ${best}%.`;
+  const cnt=Math.max(h.length,+store.get('g4count')||0);
+  $('#hist').innerHTML=`Tentativas neste navegador: ${cnt}${cnt>20?' (guardadas as últimas 20)':''}. Última: ${last.acertos}/${last.total} (${last.pct}%)${last.completa===false?' · incompleta':''}. Melhor: ${best}%. <button type="button" class="mark" id="btnLimpar">Limpar meus dados deste navegador</button>`;
+  $('#btnLimpar').onclick=()=>{ ['g4hist','g4count','g4qhist','g4marc','g4nome'].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}}); marcadas=new Set(); qhist={}; $('#nome').value=''; saveMarc(); renderHist(); renderIntroStats(); toast('Dados deste navegador apagados.'); };
 }
 renderHist();
 
@@ -546,16 +555,17 @@ async function finish(){
   const answered=session.list.filter(q=>session.answers[q.id]);
   const skipped=session.list.filter(q=>!session.answers[q.id]);
   const ok=answered.filter(q=>session.answers[q.id]===q.gabarito).length;
-  const total=answered.length; const pct=total?Math.round(100*ok/total):0;
+  const total=answered.length; const base=session.mode==='simulado'?session.list.length:total; const pct=base?Math.round(100*ok/base):0; const completa=skipped.length===0;
   const elapsed=Date.now()-session.t0;
   if(session.mode==='simulado') answered.forEach(q=>bumpQ(q.id,session.answers[q.id]===q.gabarito));
-  if(total){ const h=loadHist(); h.push({t:Date.now(),acertos:ok,total,pct}); saveHist(h); }
+  if(total){ const h=loadHist(); h.push({t:Date.now(),acertos:ok,total,pct,completa,n:session.list.length}); saveHist(h); store.set('g4count',String((+store.get('g4count')||0)+1)); }
   const byC0={}; answered.forEach(q=>{byC0[q.conteudo]=byC0[q.conteudo]||{ok:0,n:0}; byC0[q.conteudo].n++; if(session.answers[q.id]===q.gabarito) byC0[q.conteudo].ok++;});
   const weakest=Object.entries(byC0).filter(([,v])=>v.ok<v.n).sort((a,b)=>a[1].ok/a[1].n-b[1].ok/b[1].n)[0];
-  $('#resTitle').textContent = !total ? 'Nenhuma questão respondida.' : (ok===total ? `${nome}, ${total} de ${total}. Nada a revisar.` : weakest ? `${nome}, ${ok} de ${total}. O que mais pesou: ${weakest[0]} (${weakest[1].ok} de ${weakest[1].n}).` : `${nome}, ${ok} de ${total}.`);
+  const parcial = completa ? '' : ` Tentativa incompleta: ${skipped.length} de ${session.list.length} sem resposta.`;
+  $('#resTitle').textContent = !total ? 'Nenhuma questão respondida.' : (ok===total&&completa ? `${nome}, ${total} de ${total}. Nada a revisar.` : (weakest ? `${nome}, ${ok} de ${session.mode==='simulado'?session.list.length:total}. O que mais pesou: ${weakest[0]} (${weakest[1].ok} de ${weakest[1].n}).` : `${nome}, ${ok} de ${session.mode==='simulado'?session.list.length:total}.`)+parcial);
   const r=52, c=2*Math.PI*r;
   $('#ring').innerHTML=`<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="${r}" fill="none" stroke="var(--line)" stroke-width="12"/><circle class="v" cx="60" cy="60" r="${r}" fill="none" stroke="var(--accent)" stroke-width="12" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c}" transform="rotate(-90 60 60)"/><text x="60" y="66" text-anchor="middle" font-family="Archivo,system-ui" font-weight="800" font-size="24" fill="var(--fg)">${pct}%</text></svg>
-    <div><div class="big">${ok} de ${total}</div><p class="muted" style="margin-top:6px">${session.mode==='estudo'?'Modo estudo':'Modo simulado'} · ${fmtTime(elapsed)}${skipped.length?` · ${skipped.length} sem resposta`:''}</p></div>`;
+    <div><div class="big">${ok} de ${session.mode==='simulado'?session.list.length:total}</div><p class="muted" style="margin-top:6px">${session.mode==='estudo'?'Modo estudo':'Modo simulado'} · ${fmtTime(elapsed)}${skipped.length?` · ${skipped.length} sem resposta`:''}</p></div>`;
   $('#statsRes').innerHTML=`<div class="stat"><b>${ok}</b><span>acertos</span></div><div class="stat"><b>${total-ok}</b><span>erros</span></div><div class="stat"><b>${skipped.length}</b><span>sem resposta</span></div><div class="stat"><b>${total?fmtTime(elapsed/total):'—'}</b><span>por questão</span></div>`;
   const byC={}; answered.forEach(q=>{byC[q.conteudo]=byC[q.conteudo]||{ok:0,n:0}; byC[q.conteudo].n++; if(session.answers[q.id]===q.gabarito) byC[q.conteudo].ok++;});
   $('#bars').innerHTML='<h3>Desempenho por conteúdo</h3>'+(Object.entries(byC).sort((a,b)=>a[1].ok/a[1].n-b[1].ok/b[1].n).map(([c2,v],i)=>`<div class="bar"><div><div>${esc(c2)}</div><div class="track"><i style="width:${100*v.ok/v.n}%;animation-delay:${i*80}ms"></i></div></div><span class="n">${v.ok}/${v.n} · ${Math.round(100*v.ok/v.n)}%</span></div>`).join('')||'<p class="muted">Responda ao menos uma questão para ver o desempenho por conteúdo.</p>');
@@ -566,8 +576,9 @@ async function finish(){
     return head+`<details class="rev ${st}"><summary><span class="k">${st==='ok'?'✓':st==='bad'?'✗':'–'}</span><span>${esc(pv.sigla)} · Q${q.numero} · ${esc(q.conteudo)}</span><span class="g">${st==='ok'?'acertou':st==='bad'?`marcou ${a} · gabarito ${q.gabarito}`:'não respondida · gabarito '+q.gabarito}</span></summary>
       <div class="body"><div class="q">${esc(q.texto)}\n${esc(q.comando)}</div>${itensHTML(q)}<ul style="list-style:none;padding:0;margin:0;display:grid;gap:4px;font-size:14px">${alts}</ul><div class="feedback ${st==='ok'?'ok':'bad'}"><span class="verdict">Gabarito: ${q.gabarito}</span><span class="ttl">Resolução comentada</span><p>${esc(q.explicacao)}</p><p class="fonte">Fonte: ${esc(pv.nome)}, questão ${q.numero}. <a href="${pv.prova}" target="_blank" rel="noopener">prova</a> · <a href="${pv.gabarito}" target="_blank" rel="noopener">gabarito</a></p></div></div></details>`}).join('');
   $('#btnReview').disabled = !session.list.some(q=>session.answers[q.id]!==q.gabarito);
+  $('#ring').hidden = !total; $('#btnWa').hidden = !total; $('#btnCopy').hidden = !total; $('#saveStatus').hidden = !total;
   const conteudos={}; Object.entries(byC).forEach(([k,v])=>conteudos[k]={ok:v.ok,n:v.n});
-  lastSummary=`Quiz Infra, Redes & Segurança (Enade) — ${nome}: ${ok}/${total} acertos (${pct}%) em ${fmtTime(elapsed)}, modo ${session.mode}.\n`+Object.entries(byC).map(([c2,v])=>`• ${c2}: ${v.ok}/${v.n}`).join('\n');
+  lastSummary=`Quiz Infra, Redes & Segurança (Enade) — ${nome}: ${ok}/${session.mode==='simulado'?session.list.length:total} acertos (${pct}%)${completa?'':' · incompleta'} em ${fmtTime(elapsed)}, modo ${session.mode}.\n`+Object.entries(byC).map(([c2,v])=>`• ${c2}: ${v.ok}/${v.n}`).join('\n');
   $('#btnWa').href='https://wa.me/?text='+encodeURIComponent(lastSummary);
   show('result');
   requestAnimationFrame(()=>requestAnimationFrame(()=>{ const v=document.querySelector('#ring circle.v'); if(v) v.style.strokeDashoffset=String(c*(1-pct/100)); }));
@@ -575,11 +586,11 @@ async function finish(){
   const st=$('#saveStatus'); st.className='save'; st.innerHTML='';
   if(!total) return;
   st.innerHTML='<span class="dot"></span><span>Salvando no painel da turma…</span>';
-  const rec={nome,acertos:ok,total,pct,modo:session.mode,segundos:Math.round(elapsed/1000),quando:new Date().toISOString(),conteudos};
+  const rec={nome,acertos:ok,total,pct,completa,modo:session.mode,segundos:Math.round(elapsed/1000),quando:new Date().toISOString(),conteudos};
   try{
     const where=await saveResult(rec);
     if(where==='db'){ st.className='save ok'; st.innerHTML='<span class="dot"></span><span>Resultado salvo no painel da turma.</span>'; }
-    else { st.className='save'; st.innerHTML='<span class="dot"></span><span>Resultado guardado neste navegador. Envie o resumo pelo WhatsApp para registrar na turma.</span>'; }
+    else { st.className='save'; st.innerHTML='<span class="dot"></span><span>Nesta versão do site o painel da turma não está ativo: seu resultado fica neste navegador. Para registrar na turma, use “Enviar no WhatsApp” e o formulário de avaliação.</span>'; }
   }catch(e){ st.className='save bad'; st.innerHTML='<span class="dot"></span><span>Não foi possível salvar no painel (acesso sem permissão de gravação). Envie o resumo pelo WhatsApp ou copie o texto.</span>'; }
 }
 async function copyText(t,msg){
