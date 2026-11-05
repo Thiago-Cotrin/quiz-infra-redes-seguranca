@@ -384,7 +384,7 @@ function renderIntroStats(){
   refreshOptions();
   const f=filtered();
   const byC={}; f.forEach(q=>byC[q.conteudo]=(byC[q.conteudo]||0)+1);
-  const min=Math.max(1,Math.round(f.length*1.5));
+  const min=Math.max(1,Math.round(f.length*0.85));
   $('#statsIntro').innerHTML = f.length ? `<span class="mono">${f.length} ${f.length===1?'questão':'questões'} · ${Object.keys(byC).length} ${Object.keys(byC).length===1?'conteúdo':'conteúdos'} · ${new Set(f.map(q=>q.prova)).size} ${new Set(f.map(q=>q.prova)).size===1?'prova':'provas'} · uns ${min} min</span>` : '<span class="mono">Nenhuma questão com esses filtros.</span>';
   $('#btnStart').disabled = f.length===0;
   $('#btnStart').textContent = mode==='estudo'?'Começar':'Iniciar simulado';
